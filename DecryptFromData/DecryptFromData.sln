@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DecryptFromData", "DecryptFromData\DecryptFromData.vcxproj", "{AA15A387-8F5D-43B7-B00F-E827BF7F7543}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EncryptIntoData", "EncryptIntoData\EncryptIntoData.vcxproj", "{225A8B13-EB97-448F-90A0-9D262BD4B53E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AA15A387-8F5D-43B7-B00F-E827BF7F7543}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AA15A387-8F5D-43B7-B00F-E827BF7F7543}.Debug|Win32.Build.0 = Debug|Win32
+		{AA15A387-8F5D-43B7-B00F-E827BF7F7543}.Release|Win32.ActiveCfg = Release|Win32
+		{AA15A387-8F5D-43B7-B00F-E827BF7F7543}.Release|Win32.Build.0 = Release|Win32
+		{225A8B13-EB97-448F-90A0-9D262BD4B53E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{225A8B13-EB97-448F-90A0-9D262BD4B53E}.Debug|Win32.Build.0 = Debug|Win32
+		{225A8B13-EB97-448F-90A0-9D262BD4B53E}.Release|Win32.ActiveCfg = Release|Win32
+		{225A8B13-EB97-448F-90A0-9D262BD4B53E}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DecryptFromBmp", "DecryptFromBmp\DecryptFromBmp.vcxproj", "{0C9C9059-F68B-41BA-ABB6-D590317F926F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EncryptAsBmp", "EncryptAsBmp\EncryptAsBmp.vcxproj", "{4A48EA05-1BC1-4E89-AD47-D6CD18156C47}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C9C9059-F68B-41BA-ABB6-D590317F926F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0C9C9059-F68B-41BA-ABB6-D590317F926F}.Debug|Win32.Build.0 = Debug|Win32
+		{0C9C9059-F68B-41BA-ABB6-D590317F926F}.Release|Win32.ActiveCfg = Release|Win32
+		{0C9C9059-F68B-41BA-ABB6-D590317F926F}.Release|Win32.Build.0 = Release|Win32
+		{4A48EA05-1BC1-4E89-AD47-D6CD18156C47}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4A48EA05-1BC1-4E89-AD47-D6CD18156C47}.Debug|Win32.Build.0 = Debug|Win32
+		{4A48EA05-1BC1-4E89-AD47-D6CD18156C47}.Release|Win32.ActiveCfg = Release|Win32
+		{4A48EA05-1BC1-4E89-AD47-D6CD18156C47}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

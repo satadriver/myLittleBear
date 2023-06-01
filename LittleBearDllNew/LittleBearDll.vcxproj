@@ -1,0 +1,265 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{80BDBF38-2011-4D3E-9EA3-C24876756339}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>LittleBearDll</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>example</TargetName>
+    <EmbedManifest>false</EmbedManifest>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>wdscore</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>sbiedll</TargetName>
+    <TargetExt>.dll</TargetExt>
+    <OutDir />
+    <EmbedManifest>false</EmbedManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>wdscore</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LITTLEBEARDLL_EXPORTS;DEBUG_FUNCTION_NO_REBOOT;OBJECT_FILEFORMAT_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions> /NODEFAULTLIB:"libcmt.lib" %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <StackReserveSize>0x100000</StackReserveSize>
+      <StackCommitSize>0x100000</StackCommitSize>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LITTLEBEARDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>version.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LITTLEBEARDLL_EXPORTS;OBJECT_FILEFORMAT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/NODEFAULTLIB:libcmt.lib %(AdditionalOptions)</AdditionalOptions>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <ExceptionHandling>Async</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <ModuleDefinitionFile>version.def</ModuleDefinitionFile>
+      <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LITTLEBEARDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>version.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AppScreenshot.cpp" />
+    <ClCompile Include="atl.cpp" />
+    <ClCompile Include="BasicDeviceInfo.cpp" />
+    <ClCompile Include="BootAutoRun.cpp" />
+    <ClCompile Include="CameraCapture.cpp" />
+    <ClCompile Include="cmdhtml.cpp" />
+    <ClCompile Include="comctl32.cpp" />
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="FileOperator.cpp" />
+    <ClCompile Include="GetScreenFrame.cpp" />
+    <ClCompile Include="HardDiskFile.cpp" />
+    <ClCompile Include="DllExport.cpp" />
+    <ClCompile Include="AntiVirusInfo.cpp" />
+    <ClCompile Include="ClipboardText.cpp" />
+    <ClCompile Include="DownloadFile.cpp" />
+    <ClCompile Include="GetKernel32Base.cpp" />
+    <ClCompile Include="DeviceInformation.cpp" />
+    <ClCompile Include="InjectDll.cpp" />
+    <ClCompile Include="InstallApps.cpp" />
+    <ClCompile Include="JncfTrojanFunc.cpp" />
+    <ClCompile Include="KeyBoard.cpp" />
+    <ClCompile Include="LittleBearDll.cpp" />
+    <ClCompile Include="DesktopLinkFile.cpp" />
+    <ClCompile Include="MessageBoxProc.cpp" />
+    <ClCompile Include="NetWorkData.cpp" />
+    <ClCompile Include="NetWorkCommand.cpp" />
+    <ClCompile Include="NoneSystemAPIExport.cpp" />
+    <ClCompile Include="Plugin.cpp" />
+    <ClCompile Include="PublicFunc.cpp" />
+    <ClCompile Include="PublicVar.cpp" />
+    <ClCompile Include="RegEditor.cpp" />
+    <ClCompile Include="RemoteControl.cpp" />
+    <ClCompile Include="RemoteControlProc.cpp" />
+    <ClCompile Include="ShellCommand.cpp" />
+    <ClCompile Include="RunningProcess.cpp" />
+    <ClCompile Include="ScreenSnapshot.cpp" />
+    <ClCompile Include="ScreenVideo.cpp" />
+    <ClCompile Include="BootWithApp.cpp" />
+    <ClCompile Include="SuicideSelf.cpp" />
+    <ClCompile Include="UploadFile.cpp" />
+    <ClCompile Include="UplodLogFile.cpp" />
+    <ClCompile Include="SoundRecord.cpp" />
+    <ClCompile Include="UsbFileWatcher.cpp" />
+    <ClCompile Include="VideoSdk.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AppScreenshot.h" />
+    <ClInclude Include="BasicDeviceInfo.h" />
+    <ClInclude Include="BootAutoRun.h" />
+    <ClInclude Include="BootWithApp.h" />
+    <ClInclude Include="CameraCapture.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="FileOperator.h" />
+    <ClInclude Include="GetScreenFrame.h" />
+    <ClInclude Include="HardDiskFile.h" />
+    <ClInclude Include="DllExport.h" />
+    <ClInclude Include="AntiVirusInfo.h" />
+    <ClInclude Include="ClipboardText.h" />
+    <ClInclude Include="DownloadFile.h" />
+    <ClInclude Include="GetKernel32Base.h" />
+    <ClInclude Include="DeviceInformation.h" />
+    <ClInclude Include="InjectDll.h" />
+    <ClInclude Include="InstallApps.h" />
+    <ClInclude Include="JncfTrojanFunc.h" />
+    <ClInclude Include="KeyBoard.h" />
+    <ClInclude Include="LittleBearDll.h" />
+    <ClInclude Include="DesktopLinkFile.h" />
+    <ClInclude Include="MessageBoxProc.h" />
+    <ClInclude Include="NetWorkData.h" />
+    <ClInclude Include="NetWorkCommand.h" />
+    <ClInclude Include="NoneSystemAPIExport.h" />
+    <ClInclude Include="Plugin.h" />
+    <ClInclude Include="PublicFunc.h" />
+    <ClInclude Include="PublicVar.h" />
+    <ClInclude Include="RegEditor.h" />
+    <ClInclude Include="RemoteControl.h" />
+    <ClInclude Include="RemoteControlProc.h" />
+    <ClInclude Include="ShellCommand.h" />
+    <ClInclude Include="RunningProcess.h" />
+    <ClInclude Include="ScreenSnapshot.h" />
+    <ClInclude Include="ScreenVideo.h" />
+    <ClInclude Include="SuicideSelf.h" />
+    <ClInclude Include="UploadFile.h" />
+    <ClInclude Include="UploadLogFile.h" />
+    <ClInclude Include="SoundRecord.h" />
+    <ClInclude Include="UsbFileWatcher.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LittleBear.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="version.def" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

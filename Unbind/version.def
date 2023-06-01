@@ -1,0 +1,41 @@
+
+
+
+
+EXPORTS
+
+vSetDdrawflag				@1
+AlphaBlend					@2
+DllInitialize				@3
+GradientFill				@4
+TransparentBlt				@5
+EndCopyFile					@6
+EndPatch					@7
+EndRollback					@8
+EndRollbackFile				@9
+StartCopyFile				@10
+StartPatch					@11
+StartRollback				@12
+StartRollbackFile			@13
+DllCanUnloadNow				@14
+DllGetClassObject			@15
+DllRegisterServer			@16
+DllUnregisterServer			@17
+
+
+
+GetFileVersionInfoA			@18
+GetFileVersionInfoByHandle	@19 
+GetFileVersionInfoExW		@20 
+GetFileVersionInfoSizeA		@21
+GetFileVersionInfoSizeExW	@22 
+GetFileVersionInfoSizeW		@23 
+GetFileVersionInfoW			@24
+VerFindFileA				@25
+VerFindFileW				@26
+VerInstallFileA				@27
+VerInstallFileW				@28
+VerLanguageNameA			@29
+VerLanguageNameW			@30
+VerQueryValueA				@31
+VerQueryValueW				@32

@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrojanClient", "TrojanClient\TrojanClient.vcxproj", "{59D5946D-335F-4757-8BAB-9BEE26429070}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrojanServer", "TrojanServer\TrojanServer.vcxproj", "{C38951D4-C114-44A1-96C5-AC013EE0220A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{59D5946D-335F-4757-8BAB-9BEE26429070}.Debug|Win32.ActiveCfg = Debug|Win32
+		{59D5946D-335F-4757-8BAB-9BEE26429070}.Debug|Win32.Build.0 = Debug|Win32
+		{59D5946D-335F-4757-8BAB-9BEE26429070}.Release|Win32.ActiveCfg = Release|Win32
+		{59D5946D-335F-4757-8BAB-9BEE26429070}.Release|Win32.Build.0 = Release|Win32
+		{C38951D4-C114-44A1-96C5-AC013EE0220A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C38951D4-C114-44A1-96C5-AC013EE0220A}.Debug|Win32.Build.0 = Debug|Win32
+		{C38951D4-C114-44A1-96C5-AC013EE0220A}.Release|Win32.ActiveCfg = Release|Win32
+		{C38951D4-C114-44A1-96C5-AC013EE0220A}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

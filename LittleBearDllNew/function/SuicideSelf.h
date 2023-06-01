@@ -1,0 +1,3 @@
+
+
+int __stdcall SuicideSelf();

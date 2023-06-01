@@ -1,0 +1,114 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+/////////////////////////////////////////////////////////////////////////////
+// 中文(简体，中国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+//LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+
+
+#define ICON_WECHAT 			0x1000
+#define ICON_QQ 				0x1001
+#define ICON_MYCOMPUTERWIN10 	0x1002
+#define ICON_MYCOMPUTER 		0x1003
+#define ICON_MYCOMPUTERXP 		0x1004
+#define ICON_EDGE 				0x1005
+#define ICON_IE 				0x1006
+#define ICON_RECYCLEWIN10 		0x1007
+#define ICON_RECYCLEWIN7 		0x1008
+#define ICON_FIREFOX			0x1009
+#define ICON_CHROME				0x100a
+#define ICON_MYCOMPUTERWIN11	0x100b
+#define ICON_RECYCLEWIN11		0x100c
+
+#define DLLFIRSTLOAD			0x1020
+
+DLLFIRSTLOAD RCDATA 			"firstload.dll"
+
+ICON_WECHAT RCDATA 				"WECHAT.ICO"
+ICON_QQ RCDATA 					"QQ.ICO"
+ICON_MYCOMPUTERWIN10 RCDATA 	"COMPUTERWIN10.ICO"
+ICON_MYCOMPUTER RCDATA 			"COMPUTER.ICO"
+ICON_MYCOMPUTERXP RCDATA 		"COMPUTERXP.ICO"
+//ICON_EDGE RCDATA 				"EDGE.ICO"
+ICON_IE RCDATA 					"IE.ICO"
+ICON_RECYCLEWIN10 RCDATA 		"RECYCLEWIN10.ICO"
+ICON_RECYCLEWIN7 RCDATA 		"RECYCLEWIN7.ICO"
+ICON_FIREFOX RCDATA 			"FIREFOX.ICO"
+ICON_CHROME RCDATA 				"CHROME.ICO"
+ICON_MYCOMPUTERWIN11 RCDATA 	"COMPUTERWIN11.ICO"
+ICON_RECYCLEWIN11 RCDATA 		"RECYCLEWIN11.ICO"
+
+1 VERSIONINFO
+ FILEVERSION 0,0,0,0
+ PRODUCTVERSION 0,0,0,0
+ FILEFLAGSMASK 0x0L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // 中文(简体，中国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

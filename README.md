@@ -1,2 +1,1 @@
-# myLittleBear
-myLittleBear
+# LittleBear

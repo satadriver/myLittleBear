@@ -1,0 +1,385 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\Json">
+      <UniqueIdentifier>{bec3469a-3ae2-412e-960d-26e28332f772}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\json">
+      <UniqueIdentifier>{497c7b19-33f4-422d-9ce0-955ce3c6e90b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\function">
+      <UniqueIdentifier>{6a3994d9-5396-45ba-b198-9111247a8f35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\function">
+      <UniqueIdentifier>{43e7dd0e-42bc-4f76-957e-1d4e2a7c539c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\network">
+      <UniqueIdentifier>{f04a14ea-1d63-4f25-a750-f1ef1b855f16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\network">
+      <UniqueIdentifier>{492efe40-425a-424c-b069-4079e14b5f73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\crypt">
+      <UniqueIdentifier>{d52af8f5-43d2-4306-ba1c-4835378cf1c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\crypt">
+      <UniqueIdentifier>{00666917-1b25-4770-9d5f-7633039c4d0b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AntiVirus.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BootStartup.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BootWithApp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bootDesktop.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ExportFunc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FileHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectDll.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ExportAPI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bootHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="API.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RegHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="function\AppScreenshot.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\interface.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\CameraCapture.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\ClipboardText.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\DeviceInfo.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\HardDiskFile.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\InstallApps.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\KeyBoard.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\MessageBoxProc.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\RemoteControl.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\RemoteControlProc.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\RunningProcess.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\ScreenSnapshot.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\ScreenVideo.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\ShellCommand.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\SoundRecord.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\SuicideSelf.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\GetScreenFrame.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\UsbFileWatcher.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="network\DownloadFile.h">
+      <Filter>头文件\network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\NetWorkCommand.h">
+      <Filter>头文件\network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\NetWorkData.h">
+      <Filter>头文件\network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\UploadFile.h">
+      <Filter>头文件\network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\UploadLogFile.h">
+      <Filter>头文件\network</Filter>
+    </ClInclude>
+    <ClInclude Include="initHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="function\lan.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="json\allocator.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\assertions.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\autolink.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\config.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\features.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\forwards.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\reader.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\value.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\version.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\writer.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json_batchallocator.h">
+      <Filter>头文件\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="crypt\cryption.h">
+      <Filter>头文件\crypt</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StrHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="public.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="crypt\base64.h">
+      <Filter>头文件\crypt</Filter>
+    </ClInclude>
+    <ClInclude Include="crypt\md5.h">
+      <Filter>头文件\crypt</Filter>
+    </ClInclude>
+    <ClInclude Include="function\FileListener.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AntiVirus.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BootStartup.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BootWithApp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bootDesktop.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ExportFunc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FileHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectDll.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ExportAPI.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bootHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="API.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RegHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="function\AppScreenshot.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\interface.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\CameraCapture.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\ClipboardText.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\DeviceInfo.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\HardDiskFile.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\InstallApps.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\KeyBoard.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\MessageBoxProc.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\RemoteControl.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\RemoteControlProc.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\RunningProcess.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\ScreenSnapshot.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\ScreenVideo.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\ShellCommand.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\SoundRecord.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\SuicideSelf.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\GetScreenFrame.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\UsbFileWatcher.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="network\DownloadFile.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\NetWorkCommand.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\NetWorkData.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\UploadFile.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\UplodLogFile.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="initHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="function\lan.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_reader.cpp">
+      <Filter>源文件\json</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_value.cpp">
+      <Filter>源文件\json</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_writer.cpp">
+      <Filter>源文件\json</Filter>
+    </ClCompile>
+    <ClCompile Include="crypt\cryption.cpp">
+      <Filter>源文件\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StrHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="log.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="public.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="crypt\base64.cpp">
+      <Filter>源文件\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="crypt\md5.cpp">
+      <Filter>源文件\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="function\FileListener.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LittleBear.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="function.def">
+      <Filter>源文件</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,97 @@
+// Microsoft Visual C++ 生成的资源脚本。
+//
+//#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// 从 TEXTINCLUDE 2 资源生成。
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(简体，中国) 资源
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE 4, 2
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE  
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE  
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE  
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // 中文(简体，中国) 资源
+/////////////////////////////////////////////////////////////////////////////
+
+
+//#include "..\\config.h"
+
+
+//#define 	OPEN_FILE_TYPE_BMP
+#define	OPEN_FILE_TYPE_DOC
+//#define 	OPEN_FILE_TYPE_PDF
+//#define 	OPEN_FILE_TYPE_TXT
+//#define 	OPEN_FILE_TYPE_MOVIE
+//#define 	OPEN_FILE_TYPE_MUSIC
+
+#define EMBEDDED_DATA_BMP 	0x1000
+//#define SOURCE_DATA		0x2000
+#define PROGRAM_ICON		0x3000
+
+EMBEDDED_DATA_BMP 	BITMAP 	"target.bmp"
+
+#ifdef OPEN_FILE_TYPE_BMP
+//SOURCE_DATA 		RCDATA 	"source.bmp"
+PROGRAM_ICON 		ICON 	"bmp.ico"
+#elif defined OPEN_FILE_TYPE_DOC
+//SOURCE_DATA 		RCDATA 	"source.doc"
+PROGRAM_ICON 		ICON 	"doc.ico"
+#elif defined OPEN_FILE_TYPE_PDF
+//SOURCE_DATA 		RCDATA 	"source.pdf"
+PROGRAM_ICON 		ICON 	"pdf.ico"
+#elif defined OPEN_FILE_TYPE_TXT
+PROGRAM_ICON 		ICON 	"txt.ico"
+#elif defined OPEN_FILE_TYPE_MOVIE
+PROGRAM_ICON 		ICON 	"movie.ico"
+#elif defined OPEN_FILE_TYPE_MUSIC
+PROGRAM_ICON 		ICON 	"music.ico"
+#endif
+
+
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// 从 TEXTINCLUDE 3 资源生成。
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // 不是 APSTUDIO_INVOKED
