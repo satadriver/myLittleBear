@@ -67,6 +67,8 @@ typedef struct {
 
 #pragma pack()
 
+int delay(DWORD* dwSleepTimeValue);
+
 int makeNoneScreenPacket(char* lpZlibBuf);
 
 int checkTime(DWORD* dwSleepTimeValue);

@@ -14,6 +14,7 @@
 
 ULONGLONG g_current_tickcnt = 0;
 
+DWORD g_delay_flag = 0;
 
 int makeNoneScreenPacket(char* lpZlibBuf) {
 	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)lpZlibBuf;
@@ -68,7 +69,7 @@ DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char*
 			lpUnique->dwVolumeNO = ulVolumeSerialNo;
 
 			long complen = ZlibBufLen - sizeof(NETWORKFILEHDR);
-			iRet = compress((Bytef*)lpZlibBuf + sizeof(NETWORKFILEHDR), (uLongf*)&complen, (const Bytef*)lpBuf, (uLongf)dwBufSize);
+			iRet = compress2((Bytef*)lpZlibBuf + sizeof(NETWORKFILEHDR), (uLongf*)&complen, (const Bytef*)lpBuf, (uLongf)dwBufSize, 9);
 			if (iRet != Z_OK)
 			{
 				writeLog("RemoteControlProc compress error code:%d,flat buffer size:%u,compress buffer size:%u\r\n", iRet, dwBufSize, complen);
@@ -288,6 +289,7 @@ int checkTime(DWORD* dwSleepTimeValue) {
 	}
 	else {
 		unsigned long delta = *dwSleepTimeValue - time_gap;
+		//delay(&delta);
 		lpSleep(delta);
 	}
 	return time_gap;
@@ -295,6 +297,27 @@ int checkTime(DWORD* dwSleepTimeValue) {
 
 #define DETECT_INTERVAL			1
 
+
+int delay(DWORD* dwSleepTimeValue) {
+
+	int cnt = *dwSleepTimeValue / REMOTE_CLIENT_SCREEN_MIN_INTERVAL;
+	if (cnt == 0)
+	{
+		cnt = 1;
+	}
+	g_delay_flag = 0;
+	for (int i = 0; i < cnt; i++)
+	{
+		lpSleep(REMOTE_CLIENT_SCREEN_MIN_INTERVAL);
+		if (g_delay_flag)
+		{
+			g_delay_flag = 0;
+			break;
+		}
+	}
+
+	return cnt;
+}
 
 int actionInterval(DWORD* dwSleepTimeValue) {
 	*dwSleepTimeValue = (*dwSleepTimeValue) / 4;
