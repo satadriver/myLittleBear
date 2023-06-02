@@ -12,13 +12,13 @@ int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int 
 	HDC hdc = lpCreateDCA(szScreenDCName, NULL, NULL, NULL);
 	if (hdc == 0)
 	{
-		writeLog("GetScreenFrame lpCreateDCA error\r\n");
+		writeLog("GetScreenFrame lpCreateDCA error\r\n", GetLastError());
 		return FALSE;
 	}
 	HDC hmemdc = lpCreateCompatibleDC(hdc);
 	if (hmemdc == 0)
 	{
-		writeLog("GetScreenFrame lpCreateCompatibleDC error\r\n");
+		writeLog("GetScreenFrame lpCreateCompatibleDC error:%d\r\n", GetLastError());
 		lpDeleteDC(hdc);
 		return FALSE;
 	}
@@ -28,7 +28,7 @@ int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int 
 	HBITMAP hbitmap = lpCreateCompatibleBitmap(hdc, xscrn, yscrn);
 	if (hbitmap == 0)
 	{
-		writeLog("GetScreenFrame lpCreateCompatibleBitmap error\r\n");
+		writeLog("GetScreenFrame lpCreateCompatibleBitmap error:%d\r\n", GetLastError());
 		lpDeleteDC(hdc);
 		lpDeleteDC(hmemdc);
 		return FALSE;
@@ -38,7 +38,7 @@ int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int 
 	int iRes = lpBitBlt(hmemdc, 0, 0, xscrn, yscrn, hdc, left, top, SRCCOPY);
 	if (iRes == 0)
 	{
-		writeLog("lpBitBlt error\r\n");
+		writeLog("lpBitBlt error:%d\r\n", GetLastError());
 		lpDeleteObject(holdbitmap);
 		lpDeleteObject(hbitmap);
 		lpDeleteDC(hdc);
@@ -81,7 +81,7 @@ int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int 
 	iRes = lpGetObjectA(hbitmap, sizeof(BITMAP), (LPSTR)&bitmap);
 	if (iRes == 0)
 	{
-		writeLog("lpGetObjectA error\r\n");
+		writeLog("lpGetObjectA error:%d\r\n", GetLastError());
 		lpDeleteObject(hbitmap);
 		return FALSE;
 	}
@@ -122,7 +122,7 @@ int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int 
 	iRes = lpGetDIBits(hdc, hbitmap, 0, bitmap.bmHeight, lpData, (BITMAPINFO*)lpbi, DIB_RGB_COLORS);
 	if (iRes == 0)
 	{
-		writeLog("lpGetDIBits error\r\n");
+		writeLog("lpGetDIBits error:%d\r\n", GetLastError());
 		lpReleaseDC(NULL, hdc);
 		lpDeleteObject(hbitmap);
 		lpDeleteObject(holdpal);

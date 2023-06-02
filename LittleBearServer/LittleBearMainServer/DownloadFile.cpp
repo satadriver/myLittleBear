@@ -42,7 +42,7 @@ int DownloadFiles::DownloadFile(int cmd, char* cmdfn, LPUNIQUECLIENTSYMBOL lpUni
 	lphdr->packhdr.cmd = cmd;
 	lphdr->packhdr.unique = *lpUnique;
 	//lphdr->packhdr.packlen = sizeof(int) + lstrlenA(szCmd);
-	lphdr->len = gbkfn.length();
+	lphdr->origin_len = gbkfn.length();
 	memmove(DownUploadBuf + sizeof(NETWORKFILEHDR), gbkfn.c_str(), gbkfn.length());
 	int iLen = sizeof(NETWORKFILEHDR) + gbkfn.length();
 

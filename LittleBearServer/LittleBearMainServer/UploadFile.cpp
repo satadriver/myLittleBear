@@ -44,7 +44,7 @@ int UploadFiles::UploadFile(int cmd, char* cmdfn, LPUNIQUECLIENTSYMBOL lpUnique,
 	lphdr->packhdr.cmd = cmd;
 	lphdr->packhdr.unique = *lpUnique;
 	lphdr->packhdr.packlen = sizeof(int) + gbkfn.length();
-	lphdr->len = gbkfn.length();
+	lphdr->origin_len = gbkfn.length();
 	memmove(lpUploadBuf + sizeof(NETWORKFILEHDR), gbkfn.c_str(), gbkfn.length());
 	int sendpacklen = sizeof(NETWORKFILEHDR) + gbkfn.length();
 

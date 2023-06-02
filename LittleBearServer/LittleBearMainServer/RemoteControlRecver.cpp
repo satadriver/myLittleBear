@@ -11,6 +11,10 @@
 
 using namespace std;
 
+map <HWND, LPREMOTE_CONTROL_PARAM> RemoteCtrlParamMap;
+
+map<HWND, LPREMOTE_CONTROL_PARAM >::iterator mapit;
+
 unsigned char RemoteClientKey[4] = { 0 };
 STMOUSEACTION RemoteClientLButtonClick = { 0 };
 STMOUSEACTION RemoteClientLButtonDoubleClick = { 0 };
@@ -24,7 +28,8 @@ LRESULT CALLBACK RemoteControler::RemoteControlWindowProc(HWND hWnd, UINT nMsg, 
 {
 	switch (nMsg)
 	{
-	case WM_PAINT: {
+	case WM_PAINT:
+	{
 		PAINTSTRUCT stPS = { 0 };
 		HDC hdcDst = BeginPaint(hWnd, &stPS);
 
@@ -42,7 +47,7 @@ LRESULT CALLBACK RemoteControler::RemoteControlWindowProc(HWND hWnd, UINT nMsg, 
 			return 0;
 		}
 
-		char* lpClientBitmap = mapit->second.lpClientBitmap;
+		char* lpClientBitmap = mapit->second->lpClientBitmap;
 		LPBITMAPFILEHEADER pBMFH = (LPBITMAPFILEHEADER)lpClientBitmap;
 		void* pDibts = (void*)(lpClientBitmap + pBMFH->bfOffBits);
 		LPBITMAPINFOHEADER pBMIH = (LPBITMAPINFOHEADER)(lpClientBitmap + sizeof(BITMAPFILEHEADER));
@@ -71,7 +76,8 @@ LRESULT CALLBACK RemoteControler::RemoteControlWindowProc(HWND hWnd, UINT nMsg, 
 		return 0;
 	}
 
-	case WM_KEYDOWN: {
+	case WM_KEYDOWN:
+	{
 		RemoteClientKey[0] = wParam;
 		RemoteClientKey[1] = (unsigned char)GetKeyState(VK_SHIFT);
 		return 0;
@@ -157,9 +163,12 @@ LRESULT CALLBACK RemoteControler::RemoteControlWindowProc(HWND hWnd, UINT nMsg, 
 
 BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lpparam)
 {
+	REMOTE_CONTROL_PARAM stParam = *lpparam;
+
+	int iRet = 0;
 
 	char* szWindowNameFormat = "<RemoteControl>_%s";
-	char szWindowName[MAX_PATH] = "";
+	char szWindowName[MAX_PATH];
 	char szShowInfo[1024];
 
 	wsprintfA(szShowInfo, "%u_%u_%u_%u_%u_%u_%u", lpparam->unique.cMAC[0], lpparam->unique.cMAC[1], lpparam->unique.cMAC[2], lpparam->unique.cMAC[3],
@@ -184,8 +193,11 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 	ATOM nAtom = RegisterClassExA(&stWCE);
 	if (0 == nAtom)
 	{
-		wsprintfA(szShowInfo, "RemoteControlWindow RegisterClassExA error code:%u\r\n", GetLastError());
-		WriteLog(szShowInfo);
+		iRet = closesocket(stParam.hSockClient);
+		delete[] stParam.lpClientBitmap;
+		delete lpparam;
+
+		WriteLog("RemoteControlWindow RegisterClassExA error code:%u\r\n", GetLastError());
 		return FALSE;
 	}
 
@@ -194,7 +206,13 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 	BOOL Isgetdisplay = EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devmode);
 	if (Isgetdisplay == FALSE)
 	{
-		nAtom = UnregisterClassA(szWindowName, (HINSTANCE)0x400000);
+		iRet = closesocket(stParam.hSockClient);
+
+		nAtom = UnregisterClassA(szWindowName, (HINSTANCE)GetModuleHandle(0));
+		delete[] stParam.lpClientBitmap;
+		delete lpparam;
+
+		WriteLog("RemoteControlWindow EnumDisplaySettings error code:%u\r\n", GetLastError());
 		return FALSE;
 	}
 
@@ -205,15 +223,28 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 		0, 0, xscrn, yscrn, NULL, NULL, 0, NULL);
 	if (NULL == lpparam->hwndWindow)
 	{
-		nAtom = UnregisterClassA(szWindowName, (HINSTANCE)0x400000);
-		WriteLog("RemoteControlWindow CreateWindowExA error\r\n");
+		iRet = closesocket(stParam.hSockClient);
+		delete[] stParam.lpClientBitmap;
+		delete lpparam;
+		nAtom = UnregisterClassA(szWindowName, (HINSTANCE)GetModuleHandle(0));
+		WriteLog("RemoteControlWindow CreateWindowExA error:%d\r\n", GetLastError());
 		return NULL;
 	}
 
-	REMOTE_CONTROL_PARAM stParam = *lpparam;
 
-	int iRet = ShowWindow(lpparam->hwndWindow, SW_SHOWMAXIMIZED);
+	iRet = ShowWindow(lpparam->hwndWindow, SW_SHOWMAXIMIZED);
 	iRet = UpdateWindow(lpparam->hwndWindow);
+
+	RemoteCtrlParamMap.insert(map<HWND, LPREMOTE_CONTROL_PARAM>::value_type(lpparam->hwndWindow, lpparam));
+
+	char szMac[MAX_PATH];
+	wsprintfA(szMac, "<远程目标: %02X_%02X_%02X_%02X_%02X_%02X>", stParam.unique.cMAC[0], stParam.unique.cMAC[1], stParam.unique.cMAC[2], stParam.unique.cMAC[3],
+		stParam.unique.cMAC[4], stParam.unique.cMAC[5]);
+	SetWindowTextA(lpparam->hwndWindow, szMac);
+
+	DWORD remotethreadid = 0;
+	HANDLE hRemoteProcThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)RemoteControler::RemoteControlProc, lpparam, 0, &remotethreadid);
+	CloseHandle(hRemoteProcThread);
 
 	while (TRUE)
 	{
@@ -225,12 +256,12 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 			break;
 		}
 		else {
-			iRet = TranslateMessage(&msg);//转化虚拟按键到字符消息
+			iRet = TranslateMessage(&msg);		//转化虚拟按键到字符消息
 			iRet = DispatchMessageA(&msg);
 		}
 	}
 
-	nAtom = UnregisterClassA(szWindowName, (HINSTANCE)0x400000);
+	nAtom = UnregisterClassA(szWindowName, (HINSTANCE)GetModuleHandle(0));
 
 	//if socket closed by window,return 0
 
@@ -239,17 +270,19 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 
 	iRet = closesocket(stParam.hSockClient);		//if socket closed by window,return 0
 
-	Sleep(3000);	//if no wait,uncompress buffer will cause exception in sometime
-	delete stParam.lpbmpDataSize;
-	delete stParam.lpControlWindowClose;
+	//if no wait,uncompress buffer will cause exception in sometime
+	Sleep(1000);
 
-	delete[] stParam.lpClientBitmap;
-	stParam.lpClientBitmap = 0;
 	mapit = RemoteCtrlParamMap.find(stParam.hwndWindow);
 	if (mapit != RemoteCtrlParamMap.end())
 	{
 		RemoteCtrlParamMap.erase(mapit);
 	}
+
+	delete[] stParam.lpClientBitmap;
+	stParam.lpClientBitmap = 0;
+
+	delete lpparam;
 
 	return TRUE;
 }
@@ -261,22 +294,23 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 
 int __stdcall RemoteControler::RemoteControlProc(LPREMOTE_CONTROL_PARAM lpParam)
 {
-	REMOTE_CONTROL_PARAM stParam = *lpParam;
+
 	int iRet = 0;
 
 	char* lpRecvBuf = new char[NETWORK_BUF_SIZE];
 	if (lpRecvBuf)
 	{
-		iRet = RemoteControl(stParam, &lpRecvBuf, NETWORK_BUF_SIZE);
+		iRet = RemoteControl(lpParam, &lpRecvBuf, NETWORK_BUF_SIZE);
 
 	}
 	else {
 		WriteLog("RemoteControlListen new operator client screen recv data buffer error\r\n");
 	}
 
-	iRet = SendMessageA(stParam.hwndWindow, WM_CLOSE, 0, 0);	//if connection is shut by client,need to close window
+	iRet = SendMessageA(lpParam->hwndWindow, WM_CLOSE, 0, 0);	//if connection is shut by client,need to close window
 
 	delete[]lpRecvBuf;
+
 	return FALSE;
 }
 
@@ -288,354 +322,324 @@ int __stdcall RemoteControler::RemoteControlProc(LPREMOTE_CONTROL_PARAM lpParam)
 
 
 //any error will return to main listen thread
-int RemoteControler::RemoteControl(REMOTE_CONTROL_PARAM stParam, char** lpRecvBuf, int BufSize)		//caution here!!!
+int RemoteControler::RemoteControl(REMOTE_CONTROL_PARAM* lpParam, char** lpRecvBuf, int BufSize)		//caution here!!!
 {
 	POINT stLastServerMousePos = { 0 };
 
 	NETWORKPROCPARAM stNetWorkParam = { 0 };
-	stNetWorkParam.hSockClient = stParam.hSockClient;
-	stNetWorkParam.stAddrClient = stParam.stAddrClient;
+	stNetWorkParam.hSockClient = lpParam->hSockClient;
+	stNetWorkParam.stAddrClient = lpParam->stAddrClient;
 
-	char szShowInfo[1024];
 	char szClientInfo[MAX_PATH];
 	int iRet = 0;
 
-	int dwMaxRecvBufSize = BufSize;
-
 	int framecnt = 0;
-	while (TRUE) {
 
-		int dwPackSize = recv(stParam.hSockClient, *lpRecvBuf, dwMaxRecvBufSize, 0);
+	while (TRUE) {
+		int recvSize = recv(lpParam->hSockClient, *lpRecvBuf, BufSize, 0);
 		LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)*lpRecvBuf;
 		int dwHdrLen = sizeof(NETWORKPACKETHEADER);
-		int dwDataSize = lphdr->packlen;
+		int dataSize = lphdr->packlen;
 
 		UNIQUECLIENTSYMBOL stUnique = lphdr->unique;
 		DWORD dwCommand = lphdr->cmd;
-		if (dwPackSize < dwHdrLen || (lphdr->cmd != REMOTE_CLIENT_SCREEN && dwCommand != REMOTE_NONE_SCREEN) ||
-			dwDataSize < 0 || dwDataSize > stParam.bufLimit || *stParam.lpControlWindowClose)
+		if (recvSize <= 0 || dataSize < 0 || dataSize > lpParam->bufLimit)
 		{
-			iRet = GetLastError();
 			InetAddrFormatString(stNetWorkParam, szClientInfo);
-			wsprintfA(szShowInfo, "RemoteControlProc recv error code:%u from client:%s\r\n", iRet, szClientInfo);
-			WriteLog(szShowInfo);
+			WriteLog("RemoteControlProc recv header size:%d, recv size:%d,packet size:%d, cmd:%d, error code:%u from client:%s\r\n",
+				dwHdrLen, recvSize, dataSize, dwCommand, GetLastError(), szClientInfo);
 			return FALSE;
 		}
-		else if (dwDataSize > BufSize - dwHdrLen && dwDataSize <= stParam.bufLimit - dwHdrLen)
+		else if (dataSize > BufSize - dwHdrLen && dataSize <= lpParam->bufLimit - dwHdrLen)
 		{
-			char* lpNewBuf = new char[dwDataSize + sizeof(NETWORKPACKETHEADER)];
-			memmove(lpNewBuf, *lpRecvBuf, dwPackSize);
+			BufSize = dataSize + sizeof(NETWORKPACKETHEADER) + 0x1000;
+
+			char* lpNewBuf = new char[BufSize];
+
+			memcpy(lpNewBuf, *lpRecvBuf, recvSize);
+
 			delete[] * lpRecvBuf;
+
 			*lpRecvBuf = lpNewBuf;
-			BufSize = dwDataSize + sizeof(NETWORKPACKETHEADER);
-			dwMaxRecvBufSize = dwDataSize + sizeof(NETWORKPACKETHEADER);
 		}
 
-		int iDamagedPacketFlag = 0;
-		while (dwDataSize > dwPackSize - dwHdrLen)
+		int realSize = recvSize - dwHdrLen;
+		int remainder = dataSize - realSize;
+		while (dataSize > realSize)
 		{
-			int iNextPackSize = recv(stParam.hSockClient, *lpRecvBuf + dwPackSize, dwMaxRecvBufSize - dwPackSize, 0);
-			if (iNextPackSize > 0)
+			int nextSize = recv(lpParam->hSockClient, *lpRecvBuf + recvSize, BufSize - recvSize, 0);
+			if (nextSize > 0)
 			{
-				dwPackSize += iNextPackSize;
+				recvSize += nextSize;
+				remainder -= nextSize;
+				realSize += nextSize;
 			}
 			else
 			{
-				int iRet = WSAGetLastError();
-				if (iRet == 0 || dwDataSize == dwPackSize - dwHdrLen)
+				iRet = WSAGetLastError();
+				if (dataSize >= realSize)
 				{
 					break;
 				}
 				else {
-					iDamagedPacketFlag = TRUE;
-					break;
+					WriteLog("RemoteControlProc recv multiple packet slice error,recv size:%d,real size:%d,remainder:%d, data size:%d\r\n",
+						recvSize, realSize, remainder, dataSize);
+					return FALSE;
 				}
 			}
 		}
 
-		if (iDamagedPacketFlag) {
-			WriteLog("RemoteControlProc recv splitted packet slices error\r\n");
-			return FALSE;
-		}
-
-		int iconic = IsIconic(stParam.hwndWindow);			//if IsIconic() == true,GetClientRect will fail
-		if (iconic)
+		int iconic = IsIconic(lpParam->hwndWindow);			//if IsIconic() == true,GetClientRect will fail
+		if (iconic == FALSE)
 		{
-			iRet = Commander::SendCmdPacket(&stUnique, stParam.hSockClient, *lpRecvBuf, BufSize, RECV_DATA_OK);
-			if (iRet <= 0)
-			{
-				WriteLog("RemoteControlProc send RECV_DATA_OK error\r\n");
-				return FALSE;
-			}
-			else {
-				wsprintfA(szShowInfo, "RemoteControlProc IsIconic\r\n");
-				WriteLog(szShowInfo);
-			}
-			//Sleep(0);
-			continue;
-		}
-
-		//int iszoom = IsZoomed(stParam.hwndWindow);		
-		RECT stWindowClientRect = { 0 };
-		POINT stPtMouseNow = { 0 };
-		int getclient = GetClientRect(stParam.hwndWindow, &stWindowClientRect);
-		int getcurpos = GetCursorPos(&stPtMouseNow);
-		int clientrectok = ScreenToClient(stParam.hwndWindow, &stPtMouseNow);
-		if (getclient == FALSE || getcurpos == FALSE || clientrectok == FALSE) {
-			iRet = Commander::SendCmdPacket(&stUnique, stParam.hSockClient, *lpRecvBuf, BufSize, RECV_DATA_OK);
-			if (iRet <= 0)
-			{
-				WriteLog("RemoteControlProc send RECV_DATA_OK error\r\n");
-				return FALSE;
-			}
-			else {
-				wsprintfA(szShowInfo, "RemoteControlProc GetClientRect():%u or GetCursorPos():%u or ScreenToClient():%u error\r\n",
-					getclient, getcurpos, clientrectok);
-				WriteLog(szShowInfo);
-			}
-			//Sleep(0);
-			continue;
-		}
-
-		if (dwCommand == REMOTE_CLIENT_SCREEN)
-		{
-			LPNETWORKFILEHDR lpfhdr = (LPNETWORKFILEHDR)*lpRecvBuf;
-			char* lpcompdata = *lpRecvBuf + sizeof(NETWORKFILEHDR);
-			int compsize = lpfhdr->packhdr.packlen - sizeof(int);
-			int uncomplen = lpfhdr->len;
-			long lZlibBufLen = stParam.bufLimit;
-			if (lZlibBufLen < uncomplen || stParam.lpClientBitmap == 0)
-			{
-				WriteLog("RemoteControlProc decompress buffer size is not enough\r\n");
-				return FALSE;
-			}
-
-			iRet = uncompress((Bytef*)stParam.lpClientBitmap, (uLongf*)&lZlibBufLen, (const Bytef*)lpcompdata, (uLongf)compsize);
-			if (iRet != Z_OK || *(WORD*)(stParam.lpClientBitmap) != 0x4d42)
-			{
-				InetAddrFormatString(stNetWorkParam, szClientInfo);
-				wsprintfA(szShowInfo, "RemoteControlProc unzip error or bitmap file format error,client:%s\r\n", szClientInfo);
-				WriteLog(szShowInfo);
-				//if connection is shut by client,need to close window
-				return FALSE;
-			}
-			else {
-				framecnt++;
-				if (framecnt % 10 == 0)
+			//int iszoom = IsZoomed(stParam.hwndWindow);		
+			RECT stWindowClientRect = { 0 };
+			POINT stPtMouseNow = { 0 };
+			int getclient = GetClientRect(lpParam->hwndWindow, &stWindowClientRect);
+			int getcurpos = GetCursorPos(&stPtMouseNow);
+			int clientrectok = ScreenToClient(lpParam->hwndWindow, &stPtMouseNow);
+			if (getclient == FALSE || getcurpos == FALSE || clientrectok == FALSE) {
+				iRet = Commander::SendCmdPacket(&stUnique, lpParam->hSockClient, *lpRecvBuf, BufSize, REMOTE_DUMMY_PACKET);
+				if (iRet <= 0)
 				{
-					wsprintfA(szShowInfo, "RemoteControlProc uncompress ok,zip size:%u,unzip size:%u\r\n", compsize, lZlibBufLen);
-					WriteLog(szShowInfo);
+					WriteLog("RemoteControlProc send REMOTE_DUMMY_PACKET error\r\n");
+					return FALSE;
 				}
+				else {
+					WriteLog("RemoteControlProc GetClientRect():%u or GetCursorPos():%u or ScreenToClient():%u error\r\n", getclient, getcurpos, clientrectok);
+				}
+				//must be in next loop(one recv and one send is a loop)
+				continue;
 			}
 
-			iRet = InvalidateRect(stParam.hwndWindow, &stWindowClientRect, FALSE);
-			//false will make it more faster and not lighting when reflash
-			//如果客户区全部无效 UpdateWindow将导致Windows用WM_PAINT消息调用窗口过程（如果整个客户区有效，则不调用窗口过程）
-			//如果客户区部分有效 这一WM_PAINT消息不进入消息队列，直接由WINDOWS调用窗口过程
-			//UpdateWindow(hWndRemoteCtrl);
-			//RedrawWindow(hWndRemoteCtrl,&stRect,0,RDW_INTERNALPAINT);
+			if (dwCommand == REMOTE_CLIENT_SCREEN)
+			{
+				LPNETWORKFILEHDR lpfhdr = (LPNETWORKFILEHDR)*lpRecvBuf;
+				char* lpcompdata = *lpRecvBuf + sizeof(NETWORKFILEHDR);
+				int compsize = lpfhdr->packhdr.packlen - sizeof(int);
+				int uncomplen = lpfhdr->origin_len;
+				long lZlibBufLen = lpParam->bufLimit;
+				if (lZlibBufLen < uncomplen || lpParam->lpClientBitmap == 0)
+				{
+					WriteLog("RemoteControlProc decompress buffer:%x or uncompress size or compress size error:%d\r\n",
+						lpParam->lpClientBitmap, lZlibBufLen, uncomplen);
+					return FALSE;
+				}
 
-		}
-		else if (dwCommand == REMOTE_NONE_SCREEN)
-		{
-			/*
-			InetAddrFormatString(stNetWorkParam,szClientInfo);
-			wsprintfA(szShowInfo,"RemoteControlProc recv unrecognized command,client:%s\r\n",szClientInfo);
-			WriteLog(szShowInfo);
+				iRet = uncompress((Bytef*)lpParam->lpClientBitmap, (uLongf*)&lZlibBufLen, (const Bytef*)lpcompdata, (uLongf)compsize);
+				if (iRet != Z_OK || *(WORD*)(lpParam->lpClientBitmap) != 0x4d42)
+				{
+					InetAddrFormatString(stNetWorkParam, szClientInfo);
+					WriteLog("RemoteControlProc unzip error,format:%x,uncomple:%d,compsize:%d,client:%s\r\n",
+						*(WORD*)(lpParam->lpClientBitmap), lZlibBufLen, compsize, szClientInfo);
+					//if connection is shut by client,need to close window
+					return FALSE;
+				}
+				else {
+					framecnt++;
+					if (framecnt % 10 == 0)
+					{
+						WriteLog("RemoteControlProc uncompress zip size:%u,unzip size:%u\r\n", compsize, lZlibBufLen);
+					}
+				}
 
-			iRet = SendCmdPacket(&stUnique,stParam.hSockClient,*lpRecvBuf,BufSize,RECV_DATA_OK);
-			return iRet;
-			*/
+				iRet = InvalidateRect(lpParam->hwndWindow, &stWindowClientRect, FALSE);
+				//false will make it more faster and not lighting when reflash
+				//如果客户区全部无效 UpdateWindow将导致Windows用WM_PAINT消息调用窗口过程（如果整个客户区有效，则不调用窗口过程）
+				//如果客户区部分有效 这一WM_PAINT消息不进入消息队列，直接由WINDOWS调用窗口过程
+				//UpdateWindow(hWndRemoteCtrl);
+				//RedrawWindow(hWndRemoteCtrl,&stRect,0,RDW_INTERNALPAINT);
+			}
+			else if (dwCommand == REMOTE_NONE_SCREEN)
+			{
 
-			/*
-			lphdr = (LPNETWORKPACKETHEADER)*lpRecvBuf;
-			lphdr->cmd = RECV_DATA_OK;
-			lphdr->unique = stUnique;
-			lphdr->packlen = 0;
-			iRet = send(stParam.hSockClient,(char*)lphdr,sizeof(NETWORKPACKETHEADER),0);
-			return FALSE;
-			*/
+			}
+			else {
+				WriteLog("RemoteControlProc unknown cmd:%u\r\n", dwCommand);
+			}
 
+			POINT stMaxPoint = { 0 };
+			stMaxPoint.x = stWindowClientRect.right - (stWindowClientRect.left);
+			stMaxPoint.y = stWindowClientRect.bottom - (stWindowClientRect.top);
+
+			char szSendBuf[1024];
+			int iSendDataLen = 0;
+			//lphdr = (LPNETWORKPACKETHEADER)*lpRecvBuf;
+			if (stPtMouseNow.x != stLastServerMousePos.x || stPtMouseNow.y != stLastServerMousePos.y) {
+				stLastServerMousePos.x = stPtMouseNow.x;
+				stLastServerMousePos.y = stPtMouseNow.y;
+
+				/*
+				lphdr->cmd = REMOTE_MOUSE_POS;
+				lphdr->unique = stUnique;
+				lphdr->packlen = sizeof(POINT) + sizeof(POINT);
+				LPREMOTECONTROLMOUSEPOS pos =  (LPREMOTECONTROLMOUSEPOS)(*lpRecvBuf + sizeof(NETWORKPACKETHEADER));
+				pos->pos.x = stPtMouseNow.x;
+				pos->pos.y = stPtMouseNow.y;
+				pos->size.x = stMaxPoint.x;
+				pos->size.y = stMaxPoint.y;
+				*/
+
+				* (DWORD*)(szSendBuf + iSendDataLen) = REMOTE_MOUSE_POS;
+				iSendDataLen += sizeof(DWORD);
+				*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
+				iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
+				*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
+				iSendDataLen += sizeof(DWORD);
+				*(long*)(szSendBuf + iSendDataLen) = stPtMouseNow.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stPtMouseNow.y;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
+				iSendDataLen += sizeof(long);
+			}
+			else if (RemoteMouseWheel.delta && RemoteMouseWheel.xy)
+			{
+				LPNETWORKPACKETHEADER hdr = (LPNETWORKPACKETHEADER)szSendBuf;
+				hdr->cmd = REMOTE_MOUSEWHEEL;
+				hdr->unique = stUnique;
+				hdr->packlen = sizeof(REMOTECONTROLWHEEL);
+				LPREMOTECONTROLWHEEL wheel = (LPREMOTECONTROLWHEEL)(szSendBuf + sizeof(NETWORKPACKETHEADER));
+				wheel->delta = RemoteMouseWheel.delta;
+				wheel->xy = RemoteMouseWheel.xy;
+				iSendDataLen = sizeof(NETWORKPACKETHEADER) + sizeof(REMOTECONTROLWHEEL);
+				/*
+				*(DWORD*)(szSendBuf + iSendDataLen) = REMOTE_MOUSEWHEEL;
+				iSendDataLen += sizeof(DWORD);
+
+				*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
+				iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
+
+				*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT);
+				iSendDataLen += sizeof(DWORD);
+
+				*(long*)(szSendBuf + iSendDataLen) = RemoteMouseWheel.delta;
+				iSendDataLen += sizeof(DWORD);
+
+				*(long*)(szSendBuf + iSendDataLen) = RemoteMouseWheel.xy;
+				iSendDataLen += sizeof(DWORD);
+				*/
+
+				RemoteMouseWheel.delta = 0;
+				RemoteMouseWheel.xy = 0;
+			}
+			else if (RemoteClientLButtonClick.dwType) {
+				*(DWORD*)(szSendBuf + iSendDataLen) = RemoteClientLButtonClick.dwType;
+				iSendDataLen += sizeof(DWORD);
+				*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
+				iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
+				*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
+				iSendDataLen += sizeof(DWORD);
+				*(long*)(szSendBuf + iSendDataLen) = (RemoteClientLButtonClick).stPT.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = (RemoteClientLButtonClick).stPT.y;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
+				iSendDataLen += sizeof(long);
+				RemoteClientLButtonClick.dwType = 0;
+			}
+			else if (RemoteClientRButtonClick.dwType)
+			{
+				*(DWORD*)(szSendBuf + iSendDataLen) = RemoteClientRButtonClick.dwType;
+				iSendDataLen += sizeof(DWORD);
+				*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
+				iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
+				*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
+				iSendDataLen += sizeof(DWORD);
+				*(long*)(szSendBuf + iSendDataLen) = (RemoteClientRButtonClick).stPT.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = (RemoteClientRButtonClick).stPT.y;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
+				iSendDataLen += sizeof(long);
+				RemoteClientRButtonClick.dwType = 0;
+			}
+			else if (RemoteClientLButtonDoubleClick.dwType)
+			{
+				*(DWORD*)(szSendBuf + iSendDataLen) = RemoteClientLButtonDoubleClick.dwType;
+				iSendDataLen += sizeof(DWORD);
+				*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
+				iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
+				*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
+				iSendDataLen += sizeof(DWORD);
+				*(long*)(szSendBuf + iSendDataLen) = (RemoteClientLButtonDoubleClick).stPT.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = (RemoteClientLButtonDoubleClick).stPT.y;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
+				iSendDataLen += sizeof(long);
+				RemoteClientLButtonDoubleClick.dwType = 0;
+			}
+			else if (RemoteClientRButtonDoubleClick.dwType)
+			{
+				*(DWORD*)(szSendBuf + iSendDataLen) = RemoteClientRButtonDoubleClick.dwType;
+				iSendDataLen += sizeof(DWORD);
+				*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
+				iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
+				*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
+				iSendDataLen += sizeof(DWORD);
+				*(long*)(szSendBuf + iSendDataLen) = (RemoteClientRButtonDoubleClick).stPT.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = (RemoteClientRButtonDoubleClick).stPT.y;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
+				iSendDataLen += sizeof(long);
+				*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
+				iSendDataLen += sizeof(long);
+				RemoteClientRButtonDoubleClick.dwType = 0;
+			}
+			else if (RemoteClientKey[0]) {
+				*(DWORD*)(szSendBuf + iSendDataLen) = REMOTE_KEYBOARD;
+				iSendDataLen += sizeof(DWORD);
+				*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
+				iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
+				int iKeyCnt = 1;
+				*(DWORD*)(szSendBuf + iSendDataLen) = 2;
+				iSendDataLen += sizeof(DWORD);
+				*(szSendBuf + iSendDataLen) = RemoteClientKey[0];
+				iSendDataLen += iKeyCnt;
+				*(szSendBuf + iSendDataLen) = RemoteClientKey[1];
+				iSendDataLen += iKeyCnt;
+				//memmove(szSendBuf + iSendDataLen,RemoteKeyState,256);
+				//iSendDataLen += 256;
+				RemoteClientKey[0] = 0;
+				RemoteClientKey[1] = 0;
+			}
+			else {
+				*(DWORD*)(szSendBuf + iSendDataLen) = REMOTE_DUMMY_PACKET;
+				iSendDataLen += sizeof(DWORD);
+				*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
+				iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
+				*(DWORD*)(szSendBuf + iSendDataLen) = 0;
+				iSendDataLen += sizeof(DWORD);
+			}
+
+			iRet = send(lpParam->hSockClient, szSendBuf, iSendDataLen, 0);
+			if (iRet <= 0)
+			{
+				WriteLog("RemoteControlProc send error code:%u\r\n", GetLastError());
+				return FALSE;
+			}
 		}
 		else {
-
+			iRet = Commander::SendCmdPacket(&stUnique, lpParam->hSockClient, *lpRecvBuf, BufSize, REMOTE_DUMMY_PACKET);
+			if (iRet <= 0)
+			{
+				WriteLog("RemoteControlProc send REMOTE_DUMMY_PACKET error\r\n");
+				return FALSE;
+			}
+			else {
+				WriteLog("RemoteControlProc IsIconic\r\n");
+			}
 		}
-
-		POINT stMaxPoint = { 0 };
-		stMaxPoint.x = stWindowClientRect.right - (stWindowClientRect.left);
-		stMaxPoint.y = stWindowClientRect.bottom - (stWindowClientRect.top);
-
-		char szSendBuf[1024];
-		int iSendDataLen = 0;
-		//lphdr = (LPNETWORKPACKETHEADER)*lpRecvBuf;
-		if (stPtMouseNow.x != stLastServerMousePos.x || stPtMouseNow.y != stLastServerMousePos.y) {
-			stLastServerMousePos.x = stPtMouseNow.x;
-			stLastServerMousePos.y = stPtMouseNow.y;
-
-			/*
-			lphdr->cmd = REMOTE_MOUSE_POS;
-			lphdr->unique = stUnique;
-			lphdr->packlen = sizeof(POINT) + sizeof(POINT);
-			LPREMOTECONTROLMOUSEPOS pos =  (LPREMOTECONTROLMOUSEPOS)(*lpRecvBuf + sizeof(NETWORKPACKETHEADER));
-			pos->pos.x = stPtMouseNow.x;
-			pos->pos.y = stPtMouseNow.y;
-			pos->size.x = stMaxPoint.x;
-			pos->size.y = stMaxPoint.y;
-			*/
-
-			* (DWORD*)(szSendBuf + iSendDataLen) = REMOTE_MOUSE_POS;
-			iSendDataLen += sizeof(DWORD);
-			*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
-			iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
-			*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
-			iSendDataLen += sizeof(DWORD);
-			*(long*)(szSendBuf + iSendDataLen) = stPtMouseNow.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stPtMouseNow.y;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
-			iSendDataLen += sizeof(long);
-		}
-		else if (RemoteMouseWheel.delta && RemoteMouseWheel.xy)
-		{
-			LPNETWORKPACKETHEADER hdr = (LPNETWORKPACKETHEADER)szSendBuf;
-			hdr->cmd = REMOTE_MOUSEWHEEL;
-			hdr->unique = stUnique;
-			hdr->packlen = sizeof(REMOTECONTROLWHEEL);
-			LPREMOTECONTROLWHEEL wheel = (LPREMOTECONTROLWHEEL)(szSendBuf + sizeof(NETWORKPACKETHEADER));
-			wheel->delta = RemoteMouseWheel.delta;
-			wheel->xy = RemoteMouseWheel.xy;
-			iSendDataLen = sizeof(NETWORKPACKETHEADER) + sizeof(REMOTECONTROLWHEEL);
-			/*
-			*(DWORD*)(szSendBuf + iSendDataLen) = REMOTE_MOUSEWHEEL;
-			iSendDataLen += sizeof(DWORD);
-
-			*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
-			iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
-
-			*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT);
-			iSendDataLen += sizeof(DWORD);
-
-			*(long*)(szSendBuf + iSendDataLen) = RemoteMouseWheel.delta;
-			iSendDataLen += sizeof(DWORD);
-
-			*(long*)(szSendBuf + iSendDataLen) = RemoteMouseWheel.xy;
-			iSendDataLen += sizeof(DWORD);
-			*/
-
-			RemoteMouseWheel.delta = 0;
-			RemoteMouseWheel.xy = 0;
-		}
-		else if (RemoteClientLButtonClick.dwType) {
-			*(DWORD*)(szSendBuf + iSendDataLen) = RemoteClientLButtonClick.dwType;
-			iSendDataLen += sizeof(DWORD);
-			*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
-			iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
-			*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
-			iSendDataLen += sizeof(DWORD);
-			*(long*)(szSendBuf + iSendDataLen) = (RemoteClientLButtonClick).stPT.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = (RemoteClientLButtonClick).stPT.y;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
-			iSendDataLen += sizeof(long);
-			RemoteClientLButtonClick.dwType = 0;
-		}
-		else if (RemoteClientRButtonClick.dwType)
-		{
-			*(DWORD*)(szSendBuf + iSendDataLen) = RemoteClientRButtonClick.dwType;
-			iSendDataLen += sizeof(DWORD);
-			*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
-			iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
-			*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
-			iSendDataLen += sizeof(DWORD);
-			*(long*)(szSendBuf + iSendDataLen) = (RemoteClientRButtonClick).stPT.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = (RemoteClientRButtonClick).stPT.y;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
-			iSendDataLen += sizeof(long);
-			RemoteClientRButtonClick.dwType = 0;
-		}
-		else if (RemoteClientLButtonDoubleClick.dwType)
-		{
-			*(DWORD*)(szSendBuf + iSendDataLen) = RemoteClientLButtonDoubleClick.dwType;
-			iSendDataLen += sizeof(DWORD);
-			*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
-			iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
-			*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
-			iSendDataLen += sizeof(DWORD);
-			*(long*)(szSendBuf + iSendDataLen) = (RemoteClientLButtonDoubleClick).stPT.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = (RemoteClientLButtonDoubleClick).stPT.y;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
-			iSendDataLen += sizeof(long);
-			RemoteClientLButtonDoubleClick.dwType = 0;
-		}
-		else if (RemoteClientRButtonDoubleClick.dwType)
-		{
-			*(DWORD*)(szSendBuf + iSendDataLen) = RemoteClientRButtonDoubleClick.dwType;
-			iSendDataLen += sizeof(DWORD);
-			*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
-			iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
-			*(DWORD*)(szSendBuf + iSendDataLen) = sizeof(POINT) + sizeof(POINT);
-			iSendDataLen += sizeof(DWORD);
-			*(long*)(szSendBuf + iSendDataLen) = (RemoteClientRButtonDoubleClick).stPT.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = (RemoteClientRButtonDoubleClick).stPT.y;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.x;
-			iSendDataLen += sizeof(long);
-			*(long*)(szSendBuf + iSendDataLen) = stMaxPoint.y;
-			iSendDataLen += sizeof(long);
-			RemoteClientRButtonDoubleClick.dwType = 0;
-		}
-		else if (RemoteClientKey[0]) {
-			*(DWORD*)(szSendBuf + iSendDataLen) = REMOTE_KEYBOARD;
-			iSendDataLen += sizeof(DWORD);
-			*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
-			iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
-			int iKeyCnt = 1;
-			*(DWORD*)(szSendBuf + iSendDataLen) = 2;
-			iSendDataLen += sizeof(DWORD);
-			*(szSendBuf + iSendDataLen) = RemoteClientKey[0];
-			iSendDataLen += iKeyCnt;
-			*(szSendBuf + iSendDataLen) = RemoteClientKey[1];
-			iSendDataLen += iKeyCnt;
-			//memmove(szSendBuf + iSendDataLen,RemoteKeyState,256);
-			//iSendDataLen += 256;
-			RemoteClientKey[0] = 0;
-			RemoteClientKey[1] = 0;
-		}
-		else {
-			*(DWORD*)(szSendBuf + iSendDataLen) = RECV_DATA_OK;
-			iSendDataLen += sizeof(DWORD);
-			*(LPUNIQUECLIENTSYMBOL)(szSendBuf + iSendDataLen) = stUnique;
-			iSendDataLen += sizeof(UNIQUECLIENTSYMBOL);
-			*(DWORD*)(szSendBuf + iSendDataLen) = 0;
-			iSendDataLen += sizeof(DWORD);
-		}
-
-		iRet = send(stParam.hSockClient, szSendBuf, iSendDataLen, 0);
-		if (iRet <= 0)
-		{
-			iRet = GetLastError();
-			wsprintfA(szShowInfo, "RemoteControlProc send error code:%u\r\n", iRet);
-			WriteLog(szShowInfo);
-			return FALSE;
-		}
-
-		//Sleep(0);
-		continue;
 	}
 
 	return TRUE;

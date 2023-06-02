@@ -138,7 +138,7 @@ DWORD  WINAPI NetWorkCommand(VOID)
 			int dwRecvSize = lprecv(hSock, lpBuf, NETWORK_DATABUF_SIZE, 0);
 			if (dwRecvSize < sizeof(NETWORKPACKETHEADER))
 			{
-				writeLog("command thread recv data size smaller than packet header\r\n");
+				writeLog("command thread recv data size:%d smaller than packet header\r\n", dwRecvSize);
 				break;
 			}
 

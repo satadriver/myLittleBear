@@ -130,11 +130,12 @@ int uploadData(char* lpBuf, unsigned int dwSize, unsigned int cmd, char* szAppNa
 		}
 
 		DWORD dwCommand = *(DWORD*)szRecvBuf;
-		if (dwCommand == NETWORK_IPADDRESS)
+		if (dwCommand == CHANGE_SERVER_ADDRESS)
 		{
 			*(szRecvBuf + recvlen) = 0;
 			char* lpaddr = szRecvBuf + sizeof(NETWORKFILEHDR);
-			lstrcpyA(strExternalIP, lpaddr);
+			gServerIP = inet_addr(lpaddr);
+			lstrcpyA(SERVER_IP_ADDRESS, lpaddr);
 		}
 		else if (dwCommand != RECV_DATA_OK)
 		{

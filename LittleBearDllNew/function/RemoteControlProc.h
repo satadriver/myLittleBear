@@ -1,7 +1,9 @@
 
 #pragma once
+
 #ifndef REMOTECONTROLPROC_H_H_H
 #define REMOTECONTROLPROC_H_H_H
+
 #include <Windows.h>
 #include "../api.h"
 #include "../public.h"
@@ -16,7 +18,9 @@
 
 
 using namespace Gdiplus;
+
 using namespace std;
+
 class GdiPlusIniter
 {
 public:
@@ -63,9 +67,16 @@ typedef struct {
 
 #pragma pack()
 
+int makeNoneScreenPacket(char* lpZlibBuf);
+
 int checkTime(DWORD* dwSleepTimeValue);
 
-int ScreenFrameChecker(char* src, char* dst, int len, int bytesperpix, int selector);
+int actionInterval(DWORD* dwSleepTimeValue);
+
+int freeInterval(DWORD* dwSleepTimeValue);
+
+int ScreenFrameChecker(char* src, char* dst, int len, int bytesperpix);
+
 DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char* lpZlibBuf, int ZlibBufLen, SOCKET hSock, char* lpBackup);
 
 

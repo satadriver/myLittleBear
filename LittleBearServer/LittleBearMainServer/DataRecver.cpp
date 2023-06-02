@@ -212,7 +212,7 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 	if (hdr->unique.compress == DATACOMPRESS)
 	{
 		NETWORKFILEHDR filehdr = *(LPNETWORKFILEHDR)*lpBuf;
-		lZlibBufLen = filehdr.len;
+		lZlibBufLen = filehdr.origin_len;
 		if (lZlibBufLen > MAX_BUF_SIZE || lZlibBufLen <= 0)
 		{
 			return FALSE;
@@ -230,7 +230,7 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 
 		iRet = uncompress((Bytef*)lpZlibBuf, (uLongf*)&lZlibBufLen, (const Bytef*)(*lpBuf + sizeof(NETWORKFILEHDR)),
 			(uLongf)dwDataSize - sizeof(int));
-		if (iRet != Z_OK && (lZlibBufLen < filehdr.len))
+		if (iRet != Z_OK && (lZlibBufLen < filehdr.origin_len))
 		{
 			InetAddrFormatString(stParam, szClientInfo);
 			wsprintfA(szShowInfo, "DataRecverProc unzip error code:%u,client:%s\r\n", iRet, szClientInfo);

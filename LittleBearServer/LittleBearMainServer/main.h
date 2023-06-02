@@ -19,7 +19,7 @@ using namespace std;
 
 #define MAX_USERNAME_SIZE 16
 
-#define USE_MYSQL
+//#define USE_MYSQL
 
 #define USE_USERNAME
 
@@ -71,7 +71,7 @@ typedef struct {
 
 typedef struct {
 	NETWORKPACKETHEADER packhdr;
-	int len;
+	int origin_len;
 }NETWORKFILEHDR, * LPNETWORKFILEHDR;
 
 typedef struct
@@ -176,6 +176,8 @@ typedef struct {
 #define DOWNLOADRUNDLL				38
 #define REMOTE_NONE_SCREEN			39
 #define DOWNLOADPROGRAM				40
+#define REMOTE_DUMMY_PACKET			41
+#define CHANGE_SERVER_ADDRESS		42
 
 #define NETWORK_DATAPORT			20011
 #define NETWORK_CMDPORT				20012
@@ -262,15 +264,7 @@ typedef struct {
 
 extern DWORD dwIP;
 
-extern map <HWND, REMOTE_CONTROL_PARAM> RemoteCtrlParamMap;
 
-extern map<HWND, REMOTE_CONTROL_PARAM >::iterator mapit;
-
-extern unsigned char RemoteClientKey[4];
-extern STMOUSEACTION RemoteClientLButtonClick;
-extern STMOUSEACTION RemoteClientLButtonDoubleClick;
-extern STMOUSEACTION RemoteClientRButtonClick;
-extern STMOUSEACTION RemoteClientRButtonDoubleClick;
 
 
 int InitProgram();

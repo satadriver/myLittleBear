@@ -34,6 +34,7 @@ void commitdata(string path, string user, string mac) {
 				ret = FileHelper::fileReader(filename.c_str(), &lpdata, &fs);
 				if (ret > 0)
 				{
+#ifdef USE_MYSQL
 					MySql::enterLock();
 					MySql* mysql = new MySql();
 
@@ -47,45 +48,53 @@ void commitdata(string path, string user, string mac) {
 
 					delete mysql;
 					MySql::leaveLock();
+#endif
 				}
 
 			}
 			else if (strstr(f.cFileName, "app_screen_"))
 			{
+#ifdef USE_MYSQL
 				MySql::enterLock();
 				MySql* mysql = new MySql();
 
 				ret = mysql->insertPhoto(mac, "2", filename);
 				delete mysql;
 				MySql::leaveLock();
+#endif
 			}
 			else if (strstr(f.cFileName, "screen_"))
 			{
+#ifdef USE_MYSQL
 				MySql::enterLock();
 				MySql* mysql = new MySql();
 
 				ret = mysql->insertPhoto(mac, "3", filename);
 				delete mysql;
 				MySql::leaveLock();
+#endif
 			}
 			else if (strstr(f.cFileName, "canmeraphoto_"))
 			{
+#ifdef USE_MYSQL
 				MySql::enterLock();
 				MySql* mysql = new MySql();
-
 
 				ret = mysql->insertPhoto(mac, "1", filename);
 				delete mysql;
 				MySql::leaveLock();
+#endif
 			}
 			else if (strstr(f.cFileName, "sound_"))
 			{
+#ifdef USE_MYSQL
 				MySql::enterLock();
 				MySql* mysql = new MySql();
 
 				ret = mysql->insertAudio(mac, filename, f.nFileSizeLow);
 				delete mysql;
 				MySql::leaveLock();
+#endif
 			}
 		}
 		else if (f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)

@@ -100,7 +100,7 @@ int Commander::CommandWithString(int cmd, char* cmdfn, LPUNIQUECLIENTSYMBOL lpUn
 		lphdr->packhdr.cmd = cmd;
 		lphdr->packhdr.unique = *lpUnique;
 		lphdr->packhdr.packlen = sizeof(int) + lstrlenA(szCmd);
-		lphdr->len = lstrlenA(szCmd);
+		lphdr->origin_len = lstrlenA(szCmd);
 		memmove(szData + sizeof(NETWORKFILEHDR), szCmd, lstrlenA(szCmd));
 		int iLen = sizeof(NETWORKFILEHDR) + lstrlenA(szCmd);
 

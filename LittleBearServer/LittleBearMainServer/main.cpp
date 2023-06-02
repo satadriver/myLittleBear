@@ -39,9 +39,7 @@ using namespace std;
 
 DWORD dwIP = 0;
 
-map <HWND, REMOTE_CONTROL_PARAM> RemoteCtrlParamMap;
 
-map<HWND, REMOTE_CONTROL_PARAM >::iterator mapit;
 
 
 

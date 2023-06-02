@@ -8,8 +8,9 @@
 
 
 void mytest() {
+#ifdef USE_MYSQL
 	MySql* mysql = new MySql();
-
+#endif
 	char* file = 0;
 	int filesize = 0;
 	int iret = 0;
@@ -55,8 +56,8 @@ void mytest() {
 			delete result;
 		}
 	}
-
+#ifdef USE_MYSQL
 	delete mysql;
-
+#endif
 	return;
 }
