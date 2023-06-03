@@ -5,7 +5,7 @@
 #include "GetScreenFrame.h"
 #include "../log.h"
 
-#define REMOTE_CLIENT_SCREEN_MIN_INTERVAL	40
+#define REMOTE_CLIENT_SCREEN_MIN_INTERVAL	30
 
 #define REMOTE_CLIENT_SCREEN_MAX_INTERVAL	3000
 
@@ -58,7 +58,7 @@ DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char*
 		int sendlen = 0;
 		int byteperpix = bitsperpix / 8;
 		int changecnt = ScreenFrameChecker(lpBackup, pixelData, dwbmbitssize, byteperpix);
-		if (changecnt > 64)
+		if (changecnt > (64 * byteperpix * byteperpix))
 		{
 			LPNETWORKFILEHDR lpfhdr = (LPNETWORKFILEHDR)lpZlibBuf;
 			lpfhdr->packhdr.cmd = REMOTE_CLIENT_SCREEN;
