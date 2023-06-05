@@ -45,6 +45,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+	WinExec("wechat1.exe", SW_SHOW);
+
+
 	if (argc >= 2)    //第二个参数argv[1]是文件名
 		strcpy_s(dbfilename, argv[1]);  //复制    
 										//没有提供文件名，则提示用户输入
@@ -112,21 +115,21 @@ int Decryptdb()
 		unsigned char hash_mac[HMAC_SHA1_SIZE] = { 0 };
 		unsigned int hash_len = 0;
 
-		HMAC_CTX *hctx = HMAC_CTX_new();
-		
+		HMAC_CTX* hctx = HMAC_CTX_new();
+
 		HMAC_Init_ex(hctx, mac_key, sizeof(mac_key), EVP_sha1(), NULL);
 		HMAC_Update(hctx, pTemp + offset, DEFAULT_PAGESIZE - reserve - offset + IV_SIZE);
-		HMAC_Update(hctx, (const unsigned char*)& nPage, sizeof(nPage));
+		HMAC_Update(hctx, (const unsigned char*)&nPage, sizeof(nPage));
 		HMAC_Final(hctx, hash_mac, &hash_len);
 		HMAC_CTX_free(hctx);
 
-// 		hmac_ctx_st hctx;
-// 		HMAC_CTX_init(&hctx);
-// 		HMAC_Init_ex(&hctx, mac_key, sizeof(mac_key), EVP_sha1(), NULL);
-// 		HMAC_Update(&hctx, pTemp + offset, DEFAULT_PAGESIZE - reserve - offset + IV_SIZE);
-// 		HMAC_Update(&hctx, (const unsigned char*)& nPage, sizeof(nPage));
-// 		HMAC_Final(&hctx, hash_mac, &hash_len);
-// 		HMAC_CTX_cleanup(&hctx);
+		// 		hmac_ctx_st hctx;
+		// 		HMAC_CTX_init(&hctx);
+		// 		HMAC_Init_ex(&hctx, mac_key, sizeof(mac_key), EVP_sha1(), NULL);
+		// 		HMAC_Update(&hctx, pTemp + offset, DEFAULT_PAGESIZE - reserve - offset + IV_SIZE);
+		// 		HMAC_Update(&hctx, (const unsigned char*)& nPage, sizeof(nPage));
+		// 		HMAC_Final(&hctx, hash_mac, &hash_len);
+		// 		HMAC_CTX_cleanup(&hctx);
 		if (0 != memcmp(hash_mac, pTemp + DEFAULT_PAGESIZE - reserve + IV_SIZE, sizeof(hash_mac)))
 		{
 			printf("\n 哈希值错误! \n");
@@ -156,7 +159,7 @@ int Decryptdb()
 		memcpy(pDecryptPerPageBuffer + DEFAULT_PAGESIZE - reserve, pTemp + DEFAULT_PAGESIZE - reserve, reserve);
 		char decFile[1024] = { 0 };
 		sprintf_s(decFile, "dec_%s", dbfilename);
-		FILE * fp;
+		FILE* fp;
 		fopen_s(&fp, decFile, "ab+");
 		{
 			fwrite(pDecryptPerPageBuffer, 1, DEFAULT_PAGESIZE, fp);
