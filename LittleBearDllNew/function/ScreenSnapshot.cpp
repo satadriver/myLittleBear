@@ -40,11 +40,11 @@ private:
 
 int __stdcall GetScreenSnapshot(LPSCREENSNAPSHOT_TIME lpstTime)
 {
-	GdiPlusIniter GdiPlusIniterGlobal;
-
 	SCREENSNAPSHOT_TIME stWaitTime = *lpstTime;
 	stWaitTime.iMinTime = stWaitTime.iMinTime * 1000;
 	stWaitTime.iMaxTime = stWaitTime.iMaxTime * 1000;
+
+	GdiPlusIniter GdiPlusIniterGlobal;
 
 	POINT stCurPoint = { 0 };
 	POINT stLastPoint = { 0 };
@@ -57,6 +57,9 @@ int __stdcall GetScreenSnapshot(LPSCREENSNAPSHOT_TIME lpstTime)
 	int iTimeWorkValue = stWaitTime.iMinTime;
 
 	char szScreenDCName[] = { 'D','I','S','P','L','A','Y',0 };
+
+	char szusJpgFormat[] = { 'i',0,'m',0,'a',0,'g',0,'e',0,'/',0,'j',0,'p',0,'e',0,'g',0,0,0 };
+	//char szusJpgFormat[]	= {'i',0,'m',0,'a',0,'g',0,'e',0,'/',0,'b',0,'m',0,'p',0,0,0};
 
 	try
 	{
@@ -90,7 +93,6 @@ int __stdcall GetScreenSnapshot(LPSCREENSNAPSHOT_TIME lpstTime)
 			{
 				continue;
 			}
-
 			else if (iFlagMouseKey && (iTimesCnt < iTimeWorkValue) && (iTimeWorkValue == stWaitTime.iMaxTime))
 			{
 				iTimesCnt = 0;
@@ -101,7 +103,6 @@ int __stdcall GetScreenSnapshot(LPSCREENSNAPSHOT_TIME lpstTime)
 			{
 				continue;
 			}
-
 			else if (iFlagMouseKey && (iTimesCnt >= iTimeWorkValue) && (iTimeWorkValue == stWaitTime.iMinTime))
 			{
 				iFlagMouseKey = 0;
@@ -156,8 +157,6 @@ int __stdcall GetScreenSnapshot(LPSCREENSNAPSHOT_TIME lpstTime)
 
 			EncoderParameters encoderParameters;
 			CLSID jpgClsid;
-			char szusJpgFormat[] = { 'i',0,'m',0,'a',0,'g',0,'e',0,'/',0,'j',0,'p',0,'e',0,'g',0,0,0 };
-			//char szusJpgFormat[]	= {'i',0,'m',0,'a',0,'g',0,'e',0,'/',0,'b',0,'m',0,'p',0,0,0};
 
 			if (GetEncoderClsid((const WCHAR*)szusJpgFormat, &jpgClsid) == -1)
 			{

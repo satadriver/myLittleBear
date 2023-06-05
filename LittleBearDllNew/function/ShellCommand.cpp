@@ -24,7 +24,6 @@ DWORD  __stdcall RunShellCmd(char* szCmd)
 
 	string str = makeJsonFromTxt(szCmd);
 
-
 	char szCmdOuptPutFileName[MAX_PATH] = { 0 };
 	makeFullFileName(szCmdOuptPutFileName, CMD_OUTPUT_FILE_NAME);
 

