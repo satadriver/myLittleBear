@@ -15,7 +15,7 @@
 
 using namespace std;
 
-
+int saveProgram();
 
 DWORD ReleaseFile(char* szDstPath, char* filename, HMODULE lpThisDll);
 

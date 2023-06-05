@@ -93,6 +93,8 @@ extern DWORD bComodoRunning;
 extern DWORD bJinshanRunning;
 extern DWORD bDubaRunning;
 
+extern DWORD bQAXSafeRunning;
+
 extern DWORD bNortonRunning;
 extern DWORD bRuixingRunning;
 extern DWORD bKasperskyRunning;

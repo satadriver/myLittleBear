@@ -42,6 +42,8 @@ DWORD bComodoRunning = 0;
 DWORD bJinshanRunning = 0;
 DWORD bDubaRunning = 0;
 
+DWORD bQAXSafeRunning = 0;
+
 DWORD bNortonRunning = 0;
 DWORD bRuixingRunning = 0;
 DWORD bKasperskyRunning = 0;

