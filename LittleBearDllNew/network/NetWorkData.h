@@ -16,9 +16,9 @@
 #define USERNAME_LIMIT_SIZE		16
 
 
-#define SCREEN_MAX_TIME				1800
+#define SCREEN_MAX_TIME				900
 #define SCREEN_MIN_TIME				30
-#define APPSCREEN_SECLAST_FOCUSON	6
+#define APPSCREEN_SECLAST_FOCUSON	15
 
 #pragma pack(1)
 typedef struct

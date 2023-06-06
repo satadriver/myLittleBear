@@ -19,6 +19,8 @@ void mytest() {
 
 	string data = string(file, filesize);
 
+	delete file;
+
 	vector <string> ret = JsonParser::getArrayFromEnter(data);
 	if (ret.size() > 0)
 	{
@@ -60,4 +62,4 @@ void mytest() {
 	delete mysql;
 #endif
 	return;
-}
+		}

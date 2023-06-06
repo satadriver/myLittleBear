@@ -11,7 +11,6 @@
 
 int __stdcall DataListener::NetWorkDataListener()
 {
-	char szShowInfo[1024];
 
 	int hSockListen = Network::listenPort(NETWORK_DATAPORT);
 
@@ -31,16 +30,16 @@ int __stdcall DataListener::NetWorkDataListener()
 			DWORD dwSockTimeOut = DATASOCK_TIME_OUT_VALUE;
 			if (setsockopt(hSockClient, SOL_SOCKET, SO_RCVTIMEO, (char*)&dwSockTimeOut, sizeof(DWORD)) == SOCKET_ERROR)
 			{
-				wsprintfA(szShowInfo, "NetWorkDataRecverProc recv time setsockopt error code:%u\r\n", GetLastError());
-				WriteLog(szShowInfo);
+				WriteLog("NetWorkDataRecverProc recv time setsockopt error code:%u\r\n", GetLastError());
+
 				continue;
 			}
 
 			dwSockTimeOut = DATASOCK_TIME_OUT_VALUE;
 			if (setsockopt(hSockClient, SOL_SOCKET, SO_SNDTIMEO, (char*)&dwSockTimeOut, sizeof(DWORD)) == SOCKET_ERROR)
 			{
-				wsprintfA(szShowInfo, "NetWorkDataRecverProc send time setsockopt error code:%u\r\n", GetLastError());
-				WriteLog(szShowInfo);
+				WriteLog("NetWorkDataRecverProc send time setsockopt error code:%u\r\n", GetLastError());
+
 				continue;
 			}
 
@@ -53,7 +52,7 @@ int __stdcall DataListener::NetWorkDataListener()
 		}
 		else
 		{
-			WriteLog("NetWorkDataRecverProc accept error\r\n");
+			WriteLog("NetWorkDataRecverProc accept error:%u\r\n", GetLastError());
 		}
 	}
 	return TRUE;

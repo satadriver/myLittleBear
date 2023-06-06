@@ -45,7 +45,7 @@ HANDLE g_hRemoteThread = 0;
 
 DWORD  WINAPI NetWorkCommand(VOID)
 {
-	char szShowInfo[1024];
+
 	int iRet = 0;
 	try
 	{

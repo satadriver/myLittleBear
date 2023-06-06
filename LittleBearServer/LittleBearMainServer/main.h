@@ -21,7 +21,7 @@ using namespace std;
 
 //#define USE_MYSQL
 
-#define USE_USERNAME
+//#define USE_USERNAME
 
 #pragma pack(1)
 
@@ -92,7 +92,7 @@ typedef struct
 	SOCKET			hSockClient;
 	sockaddr_in		stAddrClient;
 	DWORD			dwThreadID;
-	char			szCurrentPath[MAX_PATH];
+	//char			szCurrentPath[MAX_PATH];
 }NETWORKPROCPARAM, * LPNETWORKPROCPARAM;
 
 typedef struct

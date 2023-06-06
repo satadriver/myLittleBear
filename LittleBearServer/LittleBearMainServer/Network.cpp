@@ -8,7 +8,6 @@
 int Network::listenPort(unsigned short port) {
 
 	int iRet = 0;
-	char szout[1024];
 
 	SOCKET sListen = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sListen == INVALID_SOCKET)
@@ -26,9 +25,8 @@ int Network::listenPort(unsigned short port) {
 	if (iRet == INVALID_SOCKET)
 	{
 		closesocket(sListen);
-		iRet = WSAGetLastError();
-		wsprintfA(szout, "bind port:%u error\r\n", port);
-		WriteLog(szout);
+
+		WriteLog("bind port:%u error:%u\r\n", port, WSAGetLastError());
 
 		return FALSE;
 	}
@@ -37,8 +35,8 @@ int Network::listenPort(unsigned short port) {
 	if (iRet == INVALID_SOCKET)
 	{
 		closesocket(sListen);
-		wsprintfA(szout, "listen port:%u error\r\n", port);
-		WriteLog(szout);
+
+		WriteLog("listen port:%u error:%u\r\n", port, GetLastError());
 		return FALSE;
 	}
 

@@ -34,11 +34,10 @@ private:
 
 
 
-#define MAX_APPSCREENSHOT_LIMIT		16
 
-#define MAX_APPSCREENSHOT_COUNT		9 
 
-#define VIRTUAL_KEY_SIZE			256
+
+
 
 int __stdcall GetAppScreenshot(int iWaitTime)
 {
@@ -93,7 +92,7 @@ int __stdcall GetAppScreenshot(int iWaitTime)
 
 		int bFindWinByClass = FALSE;
 
-		int iWaitCnt = iWaitTime;
+		int iWaitCnt = 0;
 
 		int iFlagMouseKey = 0;
 
@@ -169,7 +168,7 @@ int __stdcall GetAppScreenshot(int iWaitTime)
 			}
 
 			iWaitCnt++;
-			if (iWaitCnt >= iWaitTime)
+			if (iWaitCnt > iWaitTime / 3)
 			{
 				iWaitCnt = 0;
 				if (iFlagMouseKey)
