@@ -270,7 +270,7 @@ DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char*
 		else
 		{
 			writeLog("RemoteControlProc unrecognized command:%u\r\n", dwCommand);
-			break;
+			//break;
 		}
 
 		checkTime(&dwSleepTimeValue);
