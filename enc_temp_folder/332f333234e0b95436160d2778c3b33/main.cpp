@@ -166,6 +166,7 @@ int __stdcall WinMain(__in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance
 	CloseHandle(hDataRecvThread);
 
 
+
 	// 	HANDLE hDownloadThread = CreateThread(0,0,(LPTHREAD_START_ROUTINE)DownloadTrojanListener,0,0,0);
 	// 	CloseHandle(hDownloadThread);
 	// 
@@ -175,10 +176,8 @@ int __stdcall WinMain(__in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance
 	HANDLE hGetOnlineInfo = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)OnlineManager::RefreshOnlineInfo, 0, 0, 0);
 	CloseHandle(hGetOnlineInfo);
 
-#ifdef USE_MYSQL
 	HANDLE hThreadRecommit = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)Recommit::recommit, 0, 0, 0);
 	CloseHandle(hThreadRecommit);
-#endif
 
 	while (TRUE)
 	{
