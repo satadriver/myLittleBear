@@ -83,7 +83,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.dll</TargetExt>
-    <TargetName>qmnetworkmgr</TargetName>
+    <TargetName>sbiedll</TargetName>
     <IncludePath>../json;.;./json;D:\vsproject\LittleBear\LittleBearDllNew\;$(IncludePath)</IncludePath>
     <ReferencePath>../json;.;D:\vsproject\LittleBear\LittleBearDllNew\;$(ReferencePath)</ReferencePath>
   </PropertyGroup>

@@ -82,6 +82,11 @@ LRESULT CALLBACK RemoteControler::RemoteControlWindowProc(HWND hWnd, UINT nMsg, 
 					{
 						int index = itemsize * i;
 						int offset = *(DWORD*)(lpClientBitmap + index);
+						if (offset > mapit->second->bufLimit)
+						{
+							WriteLog("pixel offset error :%u\r\n", offset);
+							break;
+						}
 						if (byteperpix == 4)
 						{
 							DWORD color = *(DWORD*)(lpClientBitmap + index + sizeof(DWORD));

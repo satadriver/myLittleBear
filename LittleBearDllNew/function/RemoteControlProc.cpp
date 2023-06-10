@@ -52,9 +52,9 @@ DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char*
 		int dwbmbitssize = 0;
 		char* pixelData = 0;
 		int dwBufSize = GetScreenFrame(bitsperpix, szScreenDCName, 0, 0, ScrnResolutionX, ScrnResolutionY, lpBuf, &pixelData, &dwbmbitssize);
-		if (dwBufSize <= 0)
+		if (dwBufSize <= 0 || dwBufSize > REMOTECONTROL_BUFFER_SIZE || dwbmbitssize > REMOTECONTROL_BUFFER_SIZE || dwbmbitssize <= 0)
 		{
-			writeLog("RemoteControlProc GetScreenFrame error\r\n");
+			writeLog("RemoteControlProc GetScreenFrame size:%d error\r\n", dwBufSize);
 
 			checkTime(&dwSleepTimeValue);
 			continue;
