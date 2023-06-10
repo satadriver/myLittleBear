@@ -75,7 +75,7 @@ int __stdcall RemoteControlServer::RemoteControlListener() {
 					lpRemoteControlParam->lpbmpDataSize = 0;
 					lpRemoteControlParam->hSockClient = hSockClient;
 					lpRemoteControlParam->stAddrClient = stAddrClient;
-					lpRemoteControlParam->lpControlWindowClose = 0;
+					lpRemoteControlParam->dataType = 0;
 					lpRemoteControlParam->lpClientBitmap = lpClientBitmap;
 					lpRemoteControlParam->bufLimit = remoteBufSize;
 					lpRemoteControlParam->hwndWindow = FALSE;

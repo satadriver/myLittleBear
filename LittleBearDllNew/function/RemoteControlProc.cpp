@@ -5,7 +5,7 @@
 #include "GetScreenFrame.h"
 #include "../log.h"
 
-#define REMOTE_CLIENT_SCREEN_MIN_INTERVAL	40
+#define REMOTE_CLIENT_SCREEN_MIN_INTERVAL	20
 
 #define REMOTE_CLIENT_SCREEN_MAX_INTERVAL	3000
 
@@ -15,6 +15,9 @@
 ULONGLONG g_current_tickcnt = 0;
 
 DWORD g_delay_flag = 0;
+
+
+
 
 int makeNoneScreenPacket(char* lpZlibBuf) {
 	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)lpZlibBuf;
@@ -30,7 +33,7 @@ int makeNoneScreenPacket(char* lpZlibBuf) {
 }
 
 
-DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char* lpZlibBuf, int ZlibBufLen, SOCKET hSock, char* lpBackup)
+DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char* lpZlibBuf, int ZlibBufLen, SOCKET hSock, char* lpBackup, char* pixels)
 {
 	char szScreenDCName[] = { 'D','I','S','P','L','A','Y',0 };
 
@@ -39,6 +42,8 @@ DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char*
 	int framecnt = 0;
 
 	DWORD dwSleepTimeValue = REMOTE_CLIENT_SCREEN_MIN_INTERVAL;
+
+	//__debugbreak();
 
 	g_current_tickcnt = GetTickCount64();
 
@@ -57,45 +62,76 @@ DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char*
 
 		int sendlen = 0;
 		int byteperpix = bitsperpix / 8;
-		int changecnt = ScreenFrameChecker(lpBackup, pixelData, dwbmbitssize, byteperpix);
-		if (changecnt > (64 * byteperpix * byteperpix))
-		{
-			LPNETWORKFILEHDR lpfhdr = (LPNETWORKFILEHDR)lpZlibBuf;
-			lpfhdr->packhdr.cmd = REMOTE_CLIENT_SCREEN;
-			LPUNIQUECLIENTSYMBOL lpUnique = (LPUNIQUECLIENTSYMBOL) & (lpfhdr->packhdr.unique);
-			memmove(lpUnique->cMAC, cMAC, MAC_ADDRESS_LENGTH);
-			lpUnique->compress = DATANONECOMPRESS;
-			lpUnique->crypt = DATANONECRYPT;
-			lpUnique->dwVolumeNO = ulVolumeSerialNo;
-
-			long complen = ZlibBufLen - sizeof(NETWORKFILEHDR);
-			iRet = compress2((Bytef*)lpZlibBuf + sizeof(NETWORKFILEHDR), (uLongf*)&complen, (const Bytef*)lpBuf, (uLongf)dwBufSize, 9);
-			if (iRet != Z_OK)
-			{
-				writeLog("RemoteControlProc compress error code:%d,flat buffer size:%u,compress buffer size:%u\r\n", iRet, dwBufSize, complen);
-
-				checkTime(&dwSleepTimeValue);
-
-				continue;
-			}
-			framecnt++;
-			if (framecnt % 10 == 0)
-			{
-				writeLog("RemoteControlProc compress ok,zip size:%u,flat size:%u\r\n", complen, dwBufSize);
-			}
-
-			lpfhdr->packhdr.packlen = sizeof(int) + complen;
-			lpfhdr->srclen = dwBufSize;
-			sendlen = complen + sizeof(NETWORKFILEHDR);
-		}
-		else if (changecnt == 0)
+		int changecnt = ScreenFrameChecker(lpBackup, pixelData, dwbmbitssize, pixels, byteperpix);
+		if (changecnt <= 0)
 		{
 			freeInterval(&dwSleepTimeValue);
 
 			sendlen = makeNoneScreenPacket(lpZlibBuf);
+
+			//sendlen = makeNoneScreenPacket(lpZlibBuf);
 		}
 		else {
-			sendlen = makeNoneScreenPacket(lpZlibBuf);
+			int totalpix = changecnt * (sizeof(DWORD) + byteperpix);
+			if (totalpix < REMOTECONTROL_BUFFER_SIZE / 2)
+			{
+				LPNETWORKFILEHDR lpfhdr = (LPNETWORKFILEHDR)lpZlibBuf;
+				lpfhdr->packhdr.cmd = REMOTE_PIXEL_PACKET;
+				LPUNIQUECLIENTSYMBOL lpUnique = (LPUNIQUECLIENTSYMBOL) & (lpfhdr->packhdr.unique);
+				memmove(lpUnique->cMAC, cMAC, MAC_ADDRESS_LENGTH);
+				lpUnique->compress = DATANONECOMPRESS;
+				lpUnique->crypt = DATANONECRYPT;
+				lpUnique->dwVolumeNO = ulVolumeSerialNo;
+
+				long complen = ZlibBufLen - sizeof(NETWORKFILEHDR);
+				iRet = compress2((Bytef*)lpZlibBuf + sizeof(NETWORKFILEHDR), (uLongf*)&complen, (const Bytef*)pixels, (uLongf)totalpix, 9);
+				if (iRet != Z_OK)
+				{
+					writeLog("RemoteControlProc compress error code:%d,flat buffer size:%u,compress buffer size:%u\r\n", iRet, totalpix, complen);
+
+					checkTime(&dwSleepTimeValue);
+
+					continue;
+				}
+				framecnt++;
+				if (framecnt % 10 == 0)
+				{
+					writeLog("RemoteControlProc compress zip result size:%u,unzip size:%u\r\n", complen, totalpix);
+				}
+
+				lpfhdr->packhdr.packlen = sizeof(int) + complen;
+				lpfhdr->srclen = dwBufSize;
+				sendlen = complen + sizeof(NETWORKFILEHDR);
+			}
+			else {
+				LPNETWORKFILEHDR lpfhdr = (LPNETWORKFILEHDR)lpZlibBuf;
+				lpfhdr->packhdr.cmd = REMOTE_CLIENT_SCREEN;
+				LPUNIQUECLIENTSYMBOL lpUnique = (LPUNIQUECLIENTSYMBOL) & (lpfhdr->packhdr.unique);
+				memmove(lpUnique->cMAC, cMAC, MAC_ADDRESS_LENGTH);
+				lpUnique->compress = DATANONECOMPRESS;
+				lpUnique->crypt = DATANONECRYPT;
+				lpUnique->dwVolumeNO = ulVolumeSerialNo;
+
+				long complen = ZlibBufLen - sizeof(NETWORKFILEHDR);
+				iRet = compress2((Bytef*)lpZlibBuf + sizeof(NETWORKFILEHDR), (uLongf*)&complen, (const Bytef*)lpBuf, (uLongf)dwBufSize, 9);
+				if (iRet != Z_OK)
+				{
+					writeLog("RemoteControlProc compress error code:%d,flat buffer size:%u,compress buffer size:%u\r\n", iRet, dwBufSize, complen);
+
+					checkTime(&dwSleepTimeValue);
+
+					continue;
+				}
+				framecnt++;
+				if (framecnt % 10 == 0)
+				{
+					writeLog("RemoteControlProc compress result zip size:%u,unzip size:%u\r\n", complen, dwBufSize);
+				}
+
+				lpfhdr->packhdr.packlen = sizeof(int) + complen;
+				lpfhdr->srclen = dwBufSize;
+				sendlen = complen + sizeof(NETWORKFILEHDR);
+			}
 		}
 
 		int sendSize = lpsend(hSock, lpZlibBuf, sendlen, 0);
@@ -337,76 +373,98 @@ int freeInterval(DWORD* dwSleepTimeValue) {
 	return *dwSleepTimeValue;
 }
 
-int ScreenFrameChecker(char* src, char* dst, int len, int bytesperpix) {
-	/*
-	int counter = 0;
-	if (bytesperpix == 2) {
-		WORD* wordsrc = (WORD*)src;
-		WORD* worddst = (WORD*)dst;
-		int times = len / bytesperpix / selector;
-		for (int i = 0; i < times; )
-		{
-			if (wordsrc[i] != worddst[i]) {
-				counter++;
-			}
-
-			i += selector;
-		}
-	}
-	else if (bytesperpix == 1) {
-
-		int times = len / bytesperpix / selector;
-		for (int i = 0; i < times; )
-		{
-			if (src[i] != dst[i]) {
-				counter++;
-			}
-
-			i += selector;
-		}
-	}
-	else if (bytesperpix == 4) {
-		DWORD* dwordsrc = (DWORD*)src;
-		DWORD* dworddst = (DWORD*)dst;
-		int times = len / bytesperpix / selector;
-		for (int i = 0; i < times; )
-		{
-			if (dwordsrc[i] != dworddst[i]) {
-				counter++;
-			}
-
-			i += selector;
-		}
-	}else if (bytesperpix == 3)
-	{
-		DWORD* dwordsrc = (DWORD*)src;
-		DWORD* dworddst = (DWORD*)dst;
-		int times = len / bytesperpix / selector;
-		for (int i = 0; i < times; )
-		{
-			if (dwordsrc[i] != dworddst[i]) {
-				counter++;
-			}
-
-			i += selector;
-		}
-	}
-
-	return counter * selector;
-	*/
+int ScreenFrameChecker(char* backup, char* color, int colorlen, char* buf, int bytesperpix) {
 
 	int counter = 0;
-	__int64* lisrc = (__int64*)src;
-	__int64* lidst = (__int64*)dst;
-	int times = len / sizeof(__int64) / DETECT_INTERVAL;
-	for (int i = 0; i < times; )
+
+	if (bytesperpix == 4)
 	{
-		if (lisrc[i] != lidst[i]) {
-			counter++;
-			lisrc[i] = lidst[i];
+		DWORD* lpback = (DWORD*)backup;
+		DWORD* lpcolor = (DWORD*)color;
+
+		for (int i = 0; i < colorlen / bytesperpix; i++)
+		{
+			if (lpback[i] != lpcolor[i]) {
+
+				lpback[i] = lpcolor[i];
+
+				char* lppixel = buf + counter * (sizeof(DWORD) + bytesperpix);
+				*(DWORD*)lppixel = i * 4;
+
+				*(DWORD*)(lppixel + sizeof(DWORD)) = lpcolor[i];
+
+				counter++;
+			}
 		}
-		i += DETECT_INTERVAL;
 	}
+	else if (bytesperpix == 3)
+	{
+		char* lpback = (char*)backup;
+		char* lpcolor = (char*)color;
+
+		for (int i = 0; i < colorlen / bytesperpix; i += 3)
+		{
+			if (lpback[i] != lpcolor[i] || lpback[i + 1] != lpcolor[i + 1] || lpback[i + 2] != lpcolor[i + 2]) {
+
+				lpback[i] = lpcolor[i];
+				lpback[i + 1] = lpcolor[i + 1];
+				lpback[i + 2] = lpcolor[i + 2];
+
+				char* lppixel = buf + counter * (sizeof(DWORD) + bytesperpix);
+				*(DWORD*)lppixel = i;
+
+				*(lppixel + sizeof(DWORD)) = lpcolor[i];
+				*(lppixel + sizeof(DWORD) + 1) = lpcolor[i + 1];
+				*(lppixel + sizeof(DWORD) + 2) = lpcolor[i + 2];
+
+				counter++;
+			}
+		}
+	}
+	else if (bytesperpix == 2)
+	{
+		WORD* lpback = (WORD*)backup;
+		WORD* lpcolor = (WORD*)color;
+
+		for (int i = 0; i < colorlen / bytesperpix; i++)
+		{
+			if (lpback[i] != lpcolor[i]) {
+
+				lpback[i] = lpcolor[i];
+
+				char* lppixel = buf + counter * (sizeof(DWORD) + bytesperpix);
+				*(DWORD*)lppixel = i * 2;
+
+				*(WORD*)(lppixel + sizeof(DWORD)) = lpcolor[i];
+
+				counter++;
+			}
+		}
+	}
+	else if (bytesperpix == 1)
+	{
+		char* lpback = (char*)backup;
+		char* lpcolor = (char*)color;
+
+		for (int i = 0; i < colorlen / bytesperpix; i++)
+		{
+			if (lpback[i] != lpcolor[i]) {
+
+				lpback[i] = lpcolor[i];
+
+				char* lppixel = buf + counter * (sizeof(DWORD) + bytesperpix);
+				*(DWORD*)lppixel = i;
+
+				*(char*)(lppixel + sizeof(DWORD)) = lpcolor[i];
+
+				counter++;
+			}
+		}
+	}
+	else {
+		return FALSE;
+	}
+
 	return counter;
 
 }

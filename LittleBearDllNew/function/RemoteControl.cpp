@@ -53,7 +53,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 			return FALSE;
 		}
 
-		int zlibBufSize = REMOTECONTROL_BUFFER_SIZE / 2;
+		int zlibBufSize = REMOTECONTROL_BUFFER_SIZE;
 		char* lpZlibBuf = new char[zlibBufSize];
 		if (lpZlibBuf == 0)
 		{
@@ -63,15 +63,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 			return FALSE;
 		}
 
-		char* lpBackup = new char[REMOTECONTROL_BUFFER_SIZE];
-		if (lpBackup == 0)
-		{
-			lpclosesocket(hSock);
-			delete[] lpBuf;
-			delete[]lpZlibBuf;
-			writeLog("RemoteControlProc new buf error:%d\r\n", GetLastError());
-			return FALSE;
-		}
+
 
 		STREMOTECONTROLPARAMS param = { ScrnResolutionX,ScrnResolutionY,REMOTEBMP_BITSPERPIXEL };
 		iRet = SendCmdPacketWithParam(hSock, REMOTECONTROL_PARAMS, (char*)&param, sizeof(STREMOTECONTROLPARAMS));
@@ -80,7 +72,6 @@ DWORD __stdcall RemoteControl(LPVOID)
 			lpclosesocket(hSock);
 			delete[]lpZlibBuf;
 			delete[] lpBuf;
-			delete[]lpBackup;
 			writeLog("RemoteControlProc SendCmdPacket error:%d\r\n", GetLastError());
 			return FALSE;
 		}
@@ -91,12 +82,24 @@ DWORD __stdcall RemoteControl(LPVOID)
 			lpclosesocket(hSock);
 			delete[]lpZlibBuf;
 			delete[] lpBuf;
-			delete[]lpBackup;
+
 			writeLog("RemoteControlProc RecvCmdPacket error:%d\r\n", GetLastError());
 			return FALSE;
 		}
 
-		iRet = RemoteControlProc(REMOTEBMP_BITSPERPIXEL, lpBuf, REMOTECONTROL_BUFFER_SIZE, lpZlibBuf, zlibBufSize, hSock, lpBackup);
+		int backup_size = (REMOTECONTROL_BUFFER_SIZE) * (sizeof(DWORD) + REMOTEBMP_BITSPERPIXEL / 8) + REMOTECONTROL_BUFFER_SIZE;
+		char* lpBackup = new char[backup_size];
+		if (lpBackup == 0)
+		{
+			lpclosesocket(hSock);
+			delete[] lpBuf;
+			delete[]lpZlibBuf;
+			writeLog("RemoteControlProc new buf error:%d\r\n", GetLastError());
+			return FALSE;
+		}
+
+		iRet = RemoteControlProc(REMOTEBMP_BITSPERPIXEL, lpBuf, REMOTECONTROL_BUFFER_SIZE, lpZlibBuf, zlibBufSize, hSock,
+			lpBackup, lpBackup + REMOTECONTROL_BUFFER_SIZE);
 
 		delete[]lpBuf;
 		delete[]lpZlibBuf;

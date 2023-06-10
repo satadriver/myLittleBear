@@ -77,9 +77,9 @@ int actionInterval(DWORD* dwSleepTimeValue);
 
 int freeInterval(DWORD* dwSleepTimeValue);
 
-int ScreenFrameChecker(char* src, char* dst, int len, int bytesperpix);
+int ScreenFrameChecker(char* back, char* color, int len, char* buf, int bytesperpix);
 
-DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char* lpZlibBuf, int ZlibBufLen, SOCKET hSock, char* lpBackup);
+DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char* lpZlibBuf, int ZlibBufLen, SOCKET hSock, char* lpBackup, char* pixels);
 
 
 #endif

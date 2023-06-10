@@ -49,15 +49,12 @@ using namespace std;
 
 
 
-void test() {
-	FileHelper::fileWriter("test.txt", "hahahaha\r\n", lstrlenA("hahahaha\r\n"), 1);
-	FileHelper::fileWriter("test.txt", "hahahaha\r\n", lstrlenA("hahahaha\r\n"), 1);
-	char* data = 0;
-	int filesize = 0;
-	FileHelper::fileReader("test.txt", &data, &filesize);
 
-	return;
+int test() {
+
+	return 0;
 }
+
 
 
 

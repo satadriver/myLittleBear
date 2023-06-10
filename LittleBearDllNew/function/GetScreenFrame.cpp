@@ -6,52 +6,37 @@
 
 
 
-int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int ScrnResolutionX, int ScrnResolutionY,
-	char* lpBuf, char** lppixel, int* pixelsize) {
+int GetScreenFrame(int ibits, char* szScreenDCName, int left, int top, int ScrnResolutionX, int ScrnResolutionY, char* lpBuf, char** lppixel, int* pixelsize) {
 
-	HDC hdc = lpCreateDCA(szScreenDCName, NULL, NULL, NULL);
+	int iRes = 0;
+
+	//HDC hdc = lpCreateDCA(szScreenDCName, 0, 0, 0);
+	HDC hdc = lpGetDC(0);
 	if (hdc == 0)
 	{
-		writeLog("GetScreenFrame lpCreateDCA error\r\n", GetLastError());
-		return FALSE;
-	}
-	HDC hmemdc = lpCreateCompatibleDC(hdc);
-	if (hmemdc == 0)
-	{
-		writeLog("GetScreenFrame lpCreateCompatibleDC error:%d\r\n", GetLastError());
-		lpDeleteDC(hdc);
+		writeLog("GetScreenFrame lpCreateDCA error:%d\r\n", GetLastError());
 		return FALSE;
 	}
 
-	int xscrn = ScrnResolutionX;
-	int yscrn = ScrnResolutionY;
-	HBITMAP hbitmap = lpCreateCompatibleBitmap(hdc, xscrn, yscrn);
+	HDC hdcmem = lpCreateCompatibleDC(hdc);
+
+	HBITMAP hbitmap = lpCreateCompatibleBitmap(hdc, ScrnResolutionX, ScrnResolutionY);
+
+	lpSelectObject(hdcmem, hbitmap);
+
+	iRes = lpBitBlt(hdcmem, 0, 0, ScrnResolutionX, ScrnResolutionY, hdc, 0, 0, SRCCOPY);
+
 	if (hbitmap == 0)
 	{
-		writeLog("GetScreenFrame lpCreateCompatibleBitmap error:%d\r\n", GetLastError());
-		lpDeleteDC(hdc);
-		lpDeleteDC(hmemdc);
-		return FALSE;
-	}
-
-	HBITMAP holdbitmap = (HBITMAP)lpSelectObject(hmemdc, hbitmap);
-	int iRes = lpBitBlt(hmemdc, 0, 0, xscrn, yscrn, hdc, left, top, SRCCOPY);
-	if (iRes == 0)
-	{
-		writeLog("lpBitBlt error:%d\r\n", GetLastError());
-		lpDeleteObject(holdbitmap);
+		lpReleaseDC(0, hdc);
+		lpDeleteDC(hdcmem);
 		lpDeleteObject(hbitmap);
-		lpDeleteDC(hdc);
-		lpDeleteDC(hmemdc);
+
+		writeLog("GetScreenFrame lpCreateCompatibleBitmap error:%d\r\n", GetLastError());
 		return FALSE;
 	}
-
-	lpDeleteObject(holdbitmap);
-	lpDeleteDC(hmemdc);
-	lpDeleteDC(hdc);
 
 	int wbitcount = 0;
-	int ibits = bitsperpix;
 	if (ibits <= 1) {
 		wbitcount = 1;
 	}
@@ -77,16 +62,8 @@ int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int 
 		dwpalettesize = (1 << wbitcount) * sizeof(RGBQUAD);
 	}
 
-	BITMAP bitmap = { 0 };
-	iRes = lpGetObjectA(hbitmap, sizeof(BITMAP), (LPSTR)&bitmap);
-	if (iRes == 0)
-	{
-		writeLog("lpGetObjectA error:%d\r\n", GetLastError());
-		lpDeleteObject(hbitmap);
-		return FALSE;
-	}
+	DWORD dwbmbitssize = ((ScrnResolutionX * wbitcount + 31) / 32) * 4 * ScrnResolutionY;
 
-	DWORD dwbmbitssize = ((bitmap.bmWidth * wbitcount + 31) / 32) * 4 * bitmap.bmHeight;
 	DWORD dwBufSize = dwbmbitssize + dwpalettesize + sizeof(BITMAPINFOHEADER) + sizeof(BITMAPFILEHEADER);
 
 	LPBITMAPFILEHEADER bmfhdr = (LPBITMAPFILEHEADER)lpBuf;
@@ -98,8 +75,8 @@ int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int 
 
 	LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)(lpBuf + sizeof(BITMAPFILEHEADER));
 	lpbi->biSize = sizeof(BITMAPINFOHEADER);
-	lpbi->biWidth = bitmap.bmWidth;
-	lpbi->biHeight = bitmap.bmHeight;
+	lpbi->biWidth = ScrnResolutionX;
+	lpbi->biHeight = ScrnResolutionY;
 	lpbi->biPlanes = 1;
 	lpbi->biBitCount = wbitcount;
 	lpbi->biCompression = BI_RGB;
@@ -109,36 +86,19 @@ int GetScreenFrame(int bitsperpix, char* szScreenDCName, int left, int top, int 
 	lpbi->biClrUsed = 0;
 	lpbi->biClrImportant = 0;
 
-	HANDLE hpal = lpGetStockObject(DEFAULT_PALETTE);
-	hdc = lpGetDC(NULL);
-	HANDLE holdpal = 0;
-	if (hpal)
-	{
-		holdpal = lpSelectPalette(hdc, (HPALETTE)hpal, FALSE);
-		lpRealizePalette(hdc);
-	}
-
 	char* lpData = lpBuf + sizeof(BITMAPINFOHEADER) + sizeof(BITMAPFILEHEADER) + dwpalettesize;
-	iRes = lpGetDIBits(hdc, hbitmap, 0, bitmap.bmHeight, lpData, (BITMAPINFO*)lpbi, DIB_RGB_COLORS);
+
+	iRes = lpGetDIBits(hdcmem, hbitmap, 0, ScrnResolutionY, lpData, (BITMAPINFO*)lpbi, DIB_RGB_COLORS);
+
+	lpDeleteDC(hdcmem);
+	lpDeleteObject(hbitmap);
+	lpReleaseDC(0, hdc);
+
 	if (iRes == 0)
 	{
 		writeLog("lpGetDIBits error:%d\r\n", GetLastError());
-		lpReleaseDC(NULL, hdc);
-		lpDeleteObject(hbitmap);
-		lpDeleteObject(holdpal);
-		lpDeleteObject(hpal);
 		return FALSE;
 	}
-
-	if (holdpal)
-	{
-		lpSelectPalette(hdc, (HPALETTE)holdpal, TRUE);
-		lpRealizePalette(hdc);
-		lpDeleteObject(holdpal);
-	}
-	lpDeleteObject(hbitmap);
-	lpDeleteObject(hpal);
-	lpReleaseDC(NULL, hdc);
 
 	*lppixel = lpData;
 	*pixelsize = dwbmbitssize;

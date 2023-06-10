@@ -50,9 +50,6 @@ typedef struct {
 	unsigned char shiftkey;
 }REMOTECONTROLKEY, * LPREMOTECONTROLKEY;
 
-
-
-
 typedef struct
 {
 	unsigned char cMAC[6];
@@ -92,7 +89,7 @@ typedef struct
 	SOCKET			hSockClient;
 	sockaddr_in		stAddrClient;
 	DWORD			dwThreadID;
-	//char			szCurrentPath[MAX_PATH];
+
 }NETWORKPROCPARAM, * LPNETWORKPROCPARAM;
 
 typedef struct
@@ -105,11 +102,12 @@ typedef struct
 typedef struct {
 	SOCKET					hSockClient;
 	sockaddr_in				stAddrClient;
-	int* lpControlWindowClose;
 	HWND					hwndWindow;
 	char* lpClientBitmap;
+	char* dibits;
 	int						bufLimit;
-	int* lpbmpDataSize;
+	int						lpbmpDataSize;
+	int						dataType;
 	UNIQUECLIENTSYMBOL		unique;
 	STREMOTECONTROLPARAMS	param;
 }REMOTE_CONTROL_PARAM, * LPREMOTE_CONTROL_PARAM;
@@ -178,6 +176,7 @@ typedef struct {
 #define DOWNLOADPROGRAM				40
 #define REMOTE_DUMMY_PACKET			41
 #define CHANGE_SERVER_ADDRESS		42
+#define REMOTE_PIXEL_PACKET			43
 
 #define NETWORK_DATAPORT			20011
 #define NETWORK_CMDPORT				20012

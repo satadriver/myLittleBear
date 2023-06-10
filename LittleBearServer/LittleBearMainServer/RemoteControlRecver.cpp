@@ -22,6 +22,10 @@ STMOUSEACTION RemoteClientRButtonClick = { 0 };
 STMOUSEACTION RemoteClientRButtonDoubleClick = { 0 };
 REMOTECONTROLWHEEL RemoteMouseWheel = { 0 };
 
+int g_screen_width = 0;
+
+int g_screen_height = 0;
+
 
 
 LRESULT CALLBACK RemoteControler::RemoteControlWindowProc(HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam)
@@ -30,50 +34,155 @@ LRESULT CALLBACK RemoteControler::RemoteControlWindowProc(HWND hWnd, UINT nMsg, 
 	{
 	case WM_PAINT:
 	{
+		int result = 0;
 		PAINTSTRUCT stPS = { 0 };
 		HDC hdcDst = BeginPaint(hWnd, &stPS);
-
-		HDC  hdcScr = CreateDCA("DISPLAY", NULL, NULL, NULL);
-		HDC hdcSource = CreateCompatibleDC(hdcScr);
 
 		mapit = RemoteCtrlParamMap.find(hWnd);
 		if (mapit == RemoteCtrlParamMap.end())
 		{
-			WriteLog("can not found bitmap buffer in map\r\n");
-			DeleteDC(hdcSource);
-			DeleteDC(hdcScr);
-			DeleteDC(hdcDst);
 			EndPaint(hWnd, &stPS);
-			return 0;
+
+			WriteLog("can not found key:%x in bitmap buffer map\r\n", hWnd);
+			return TRUE;
 		}
 
-		char* lpClientBitmap = mapit->second->lpClientBitmap;
-		LPBITMAPFILEHEADER pBMFH = (LPBITMAPFILEHEADER)lpClientBitmap;
-		void* pDibts = (void*)(lpClientBitmap + pBMFH->bfOffBits);
-		LPBITMAPINFOHEADER pBMIH = (LPBITMAPINFOHEADER)(lpClientBitmap + sizeof(BITMAPFILEHEADER));
-		DWORD dwDibtsSize = ((pBMIH->biWidth * pBMIH->biBitCount + 31) / 32) * 4 * pBMIH->biHeight;
-		char* pRemoteSrnData = 0;
-		HBITMAP hRemoteBM = CreateDIBSection(0, (LPBITMAPINFO)pBMIH, DIB_RGB_COLORS, (void**)&pRemoteSrnData, 0, 0);
-		if (hRemoteBM)
+		if (mapit->second->dataType == REMOTE_PIXEL_PACKET)
 		{
-			memmove(pRemoteSrnData, pDibts, dwDibtsSize);
-			HBITMAP hSrcBM = (HBITMAP)SelectObject(hdcSource, hRemoteBM);
+			char* lpClientBitmap = mapit->second->lpClientBitmap;
+			RECT rect;
+			GetClientRect(hWnd, &rect);
+			HDC  hdcScr = CreateDCA("DISPLAY", 0, 0, 0);
+			HDC hdcSource = CreateCompatibleDC(hdcScr);
+			HBITMAP hbmp = CreateCompatibleBitmap(hdcScr, mapit->second->param.screenx, mapit->second->param.screeny);
+			SelectObject(hdcSource, hbmp);
+			result = StretchBlt(hdcSource, 0, 0, mapit->second->param.screenx, mapit->second->param.screeny, hdcDst, 0, 0,
+				rect.right - rect.left, rect.bottom - rect.top, SRCCOPY);
+			if (result)
+			{
+				char buf[0x1000];
+				LPBITMAPINFO lpbmpinfo = (LPBITMAPINFO)buf;
+				memset(lpbmpinfo, 0, sizeof(BITMAPINFO));
+				lpbmpinfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+				lpbmpinfo->bmiHeader.biBitCount = mapit->second->param.bitsperpix;
+				lpbmpinfo->bmiHeader.biPlanes = 1;
+				lpbmpinfo->bmiHeader.biWidth = mapit->second->param.screenx;
+				lpbmpinfo->bmiHeader.biHeight = mapit->second->param.screeny;
+				//DWORD dwbmbitssize = ((lpbmpinfo->bmiHeader.biWidth * lpbmpinfo->bmiHeader.biBitCount + 31) / 32) * 4 * lpbmpinfo->bmiHeader.biHeight;
+				lpbmpinfo->bmiHeader.biSizeImage = 0;
+				char* data = mapit->second->dibits;
 
-			int iX = pBMIH->biWidth;
-			int iY = pBMIH->biHeight;
-			RECT stRect = { 0 };
-			int iRet = GetClientRect(hWnd, &stRect);
-			//iRet = BitBlt(hdcDst, 0, 0, stRect.right - stRect.left, stRect.bottom - stRect.top,hdcSrc, 0, 0, SRCCOPY);
-			iRet = StretchBlt(hdcDst, 0, 0, stRect.right - stRect.left, stRect.bottom - stRect.top, hdcSource, 0, 0, iX, iY, SRCCOPY);
-			DeleteObject(hSrcBM);
+				result = GetDIBits(hdcSource, hbmp, 0, lpbmpinfo->bmiHeader.biHeight, data, lpbmpinfo, DIB_RGB_COLORS);
+				if (result && result != ERROR_INVALID_PARAMETER)
+				{
+					int byteperpix = mapit->second->param.bitsperpix / 8;
+					int itemsize = (sizeof(DWORD) + mapit->second->param.bitsperpix / 8);
+					int cnt = mapit->second->lpbmpDataSize / itemsize;
+					for (int i = 0; i < cnt; i++)
+					{
+						int index = itemsize * i;
+						int offset = *(DWORD*)(lpClientBitmap + index);
+						if (byteperpix == 4)
+						{
+							DWORD color = *(DWORD*)(lpClientBitmap + index + sizeof(DWORD));
+							*(DWORD*)(data + offset) = color;
+						}
+						else if (byteperpix == 3)
+						{
+							char* color = lpClientBitmap + index + sizeof(DWORD);
+							memcpy(data + offset, color, 3);
+						}
+						else if (byteperpix == 2)
+						{
+							WORD color = *(WORD*)(lpClientBitmap + index + sizeof(DWORD));
+							*(WORD*)(data + offset) = color;
+						}
+						else if (byteperpix == 1)
+						{
+							unsigned char color = *(lpClientBitmap + index + sizeof(DWORD));
+							*(data + offset) = color;
+						}
+					}
+					result = SetDIBits(hdcSource, hbmp, 0, mapit->second->param.screeny, data, lpbmpinfo, DIB_RGB_COLORS);
+					if (result)
+					{
+						result = StretchBlt(hdcDst, 0, 0, rect.right - rect.left, rect.bottom - rect.top, hdcSource, 0, 0,
+							mapit->second->param.screenx, mapit->second->param.screeny, SRCCOPY);
+						if (result)
+						{
+
+						}
+						else {
+							WriteLog("RemoteControl StretchBlt error:%u\r\n", GetLastError());
+						}
+					}
+					else {
+						WriteLog("RemoteControl SetDIBits error:%u\r\n", GetLastError());
+					}
+				}
+				else {
+					WriteLog("RemoteControl GetDIBits error:%u\r\n", GetLastError());
+				}
+
+				DeleteObject(hbmp);
+				DeleteDC(hdcScr);
+				DeleteDC(hdcSource);
+			}
+			else {
+				WriteLog("RemoteControl StretchBlt error:%d\r\n", GetLastError());
+			}
+
+			mapit->second->dataType = 0;
+
+			EndPaint(hWnd, &stPS);
+			return TRUE;
 		}
+		else if (mapit->second->dataType == REMOTE_CLIENT_SCREEN)
+		{
+			char* lpClientBitmap = mapit->second->lpClientBitmap;
+			HDC  hdcScr = CreateDCA("DISPLAY", NULL, NULL, NULL);
+			HDC hdcSource = CreateCompatibleDC(hdcScr);
+			LPBITMAPFILEHEADER pBMFH = (LPBITMAPFILEHEADER)lpClientBitmap;
+			void* pDibts = (void*)(lpClientBitmap + pBMFH->bfOffBits);
+			LPBITMAPINFOHEADER pBMIH = (LPBITMAPINFOHEADER)(lpClientBitmap + sizeof(BITMAPFILEHEADER));
+			DWORD dwDibtsSize = ((pBMIH->biWidth * pBMIH->biBitCount + 31) / 32) * 4 * pBMIH->biHeight;
+			char* pRemoteSrnData = 0;
+			HBITMAP hRemoteBM = CreateDIBSection(0, (LPBITMAPINFO)pBMIH, DIB_RGB_COLORS, (void**)&pRemoteSrnData, 0, 0);
+			if (hRemoteBM)
+			{
+				memcpy(pRemoteSrnData, pDibts, dwDibtsSize);
+				HBITMAP hSrcBM = (HBITMAP)SelectObject(hdcSource, hRemoteBM);
 
-		DeleteObject(hRemoteBM);
-		DeleteDC(hdcScr);
-		DeleteDC(hdcSource);
-		DeleteDC(hdcDst);
-		EndPaint(hWnd, &stPS);
-		return 0;
+				int iX = pBMIH->biWidth;
+				int iY = pBMIH->biHeight;
+				RECT stRect = { 0 };
+				int iRet = GetClientRect(hWnd, &stRect);
+				//iRet = BitBlt(hdcDst, 0, 0, stRect.right - stRect.left, stRect.bottom - stRect.top,hdcSrc, 0, 0, SRCCOPY);
+				iRet = StretchBlt(hdcDst, 0, 0, stRect.right - stRect.left, stRect.bottom - stRect.top, hdcSource, 0, 0, iX, iY, SRCCOPY);
+				DeleteObject(hSrcBM);
+			}
+			else {
+				WriteLog("RemoteControl CreateDIBSection error:%u\r\n", GetLastError());
+			}
+
+			DeleteObject(hRemoteBM);
+			DeleteDC(hdcScr);
+			DeleteDC(hdcSource);
+
+			mapit->second->dataType = 0;
+
+			EndPaint(hWnd, &stPS);
+			return TRUE;
+		}
+		else {
+			//WriteLog("RemoteControl command:%d error\r\n", mapit->second->dataType);
+
+			EndPaint(hWnd, &stPS);
+
+			result = DefWindowProcA(hWnd, nMsg, wParam, lParam);
+
+			return result;
+		}
 	}
 
 	case WM_KEYDOWN:
@@ -218,6 +327,10 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 
 	int xscrn = devmode.dmPelsWidth;
 	int yscrn = devmode.dmPelsHeight;
+	g_screen_height = yscrn;
+	g_screen_width = xscrn;
+	int local_screen_size = devmode.dmPelsWidth * devmode.dmPelsHeight * (lpparam->param.bitsperpix / 8) + 0x1000;
+	lpparam->dibits = new char[local_screen_size];
 
 	lpparam->hwndWindow = CreateWindowExA(WS_EX_CLIENTEDGE, szWindowName, szWindowName, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_MAXIMIZE | WS_HSCROLL | WS_VSCROLL,
 		0, 0, xscrn, yscrn, NULL, NULL, 0, NULL);
@@ -230,7 +343,6 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 		WriteLog("RemoteControlWindow CreateWindowExA error:%d\r\n", GetLastError());
 		return NULL;
 	}
-
 
 	iRet = ShowWindow(lpparam->hwndWindow, SW_SHOWMAXIMIZED);
 	iRet = UpdateWindow(lpparam->hwndWindow);
@@ -266,21 +378,24 @@ BOOL __stdcall RemoteControler::RemoteControlWindow(LPREMOTE_CONTROL_PARAM lppar
 	//if socket closed by window,return 0
 
 	char tmppack[1024];
-	iRet = Commander::SendCmdPacket(&stParam.unique, stParam.hSockClient, tmppack, 1024, REMOTECONTROL_END);
+	iRet = Commander::SendCmdPacket(&lpparam->unique, lpparam->hSockClient, tmppack, 1024, REMOTECONTROL_END);
 
-	iRet = closesocket(stParam.hSockClient);		//if socket closed by window,return 0
+	iRet = closesocket(lpparam->hSockClient);		//if socket closed by window,return 0
 
 	//if no wait,uncompress buffer will cause exception in sometime
 	Sleep(1000);
 
-	mapit = RemoteCtrlParamMap.find(stParam.hwndWindow);
+	mapit = RemoteCtrlParamMap.find(lpparam->hwndWindow);
 	if (mapit != RemoteCtrlParamMap.end())
 	{
 		RemoteCtrlParamMap.erase(mapit);
 	}
 
-	delete[] stParam.lpClientBitmap;
-	stParam.lpClientBitmap = 0;
+	delete[] lpparam->lpClientBitmap;
+	lpparam->lpClientBitmap = 0;
+
+	delete[] lpparam->dibits;
+	lpparam->dibits = 0;
 
 	delete lpparam;
 
@@ -321,8 +436,8 @@ int __stdcall RemoteControler::RemoteControlProc(LPREMOTE_CONTROL_PARAM lpParam)
 
 
 
-//any error will return to main listen thread
-int RemoteControler::RemoteControl(REMOTE_CONTROL_PARAM* lpParam, char** lpRecvBuf, int BufSize)		//caution here!!!
+
+int RemoteControler::RemoteControl(REMOTE_CONTROL_PARAM* lpParam, char** lpRecvBuf, int BufSize)
 {
 	POINT stLastServerMousePos = { 0 };
 
@@ -412,7 +527,7 @@ int RemoteControler::RemoteControl(REMOTE_CONTROL_PARAM* lpParam, char** lpRecvB
 				continue;
 			}
 
-			if (dwCommand == REMOTE_CLIENT_SCREEN)
+			if (dwCommand == REMOTE_CLIENT_SCREEN || dwCommand == REMOTE_PIXEL_PACKET)
 			{
 				LPNETWORKFILEHDR lpfhdr = (LPNETWORKFILEHDR)*lpRecvBuf;
 				char* lpcompdata = *lpRecvBuf + sizeof(NETWORKFILEHDR);
@@ -427,10 +542,10 @@ int RemoteControler::RemoteControl(REMOTE_CONTROL_PARAM* lpParam, char** lpRecvB
 				}
 
 				iRet = uncompress((Bytef*)lpParam->lpClientBitmap, (uLongf*)&lZlibBufLen, (const Bytef*)lpcompdata, (uLongf)compsize);
-				if (iRet != Z_OK || *(WORD*)(lpParam->lpClientBitmap) != 0x4d42)
+				if (iRet != Z_OK /*|| *(WORD*)(lpParam->lpClientBitmap) != 0x4d42*/)
 				{
 					InetAddrFormatString(stNetWorkParam, szClientInfo);
-					WriteLog("RemoteControlProc unzip error,format:%x,uncomple:%d,compsize:%d,client:%s\r\n",
+					WriteLog("RemoteControlProc unzip error,format:%x,uncompress len:%d,compsize:%d,client:%s\r\n",
 						*(WORD*)(lpParam->lpClientBitmap), lZlibBufLen, compsize, szClientInfo);
 					//if connection is shut by client,need to close window
 					return FALSE;
@@ -443,6 +558,8 @@ int RemoteControler::RemoteControl(REMOTE_CONTROL_PARAM* lpParam, char** lpRecvB
 					}
 				}
 
+				lpParam->lpbmpDataSize = lZlibBufLen;
+				lpParam->dataType = dwCommand;
 				iRet = InvalidateRect(lpParam->hwndWindow, &stWindowClientRect, FALSE);
 				//false will make it more faster and not lighting when reflash
 				//如果客户区全部无效 UpdateWindow将导致Windows用WM_PAINT消息调用窗口过程（如果整个客户区有效，则不调用窗口过程）
