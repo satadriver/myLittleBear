@@ -19,7 +19,7 @@ int isSystemDirectory();
 
 int IsSystemPrivilege();
 
-DWORD GetProcessIdByName(char* szProcessName);
+DWORD getProcNameByPID(DWORD pid, char* procname, int buflen);
 
 HRESULT GetComFolder(int csidl, WCHAR* buffer);
 

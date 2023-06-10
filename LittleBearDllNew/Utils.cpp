@@ -156,6 +156,35 @@ DWORD GetProcessIdByName(char* szProcessName)
 }
 
 
+DWORD getProcNameByPID(DWORD pid, char* procname, int buflen)
+{
+	HANDLE h = NULL;
+	PROCESSENTRY32 pe = { 0 };
+	DWORD ppid = 0;
+	pe.dwSize = sizeof(PROCESSENTRY32);
+	h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (Process32First(h, &pe))
+	{
+		do
+		{
+			if (pe.th32ProcessID == pid)
+			{
+
+				int len = WideCharToMultiByte(CP_ACP, 0, pe.szExeFile, -1, procname, buflen, 0, 0);
+				if (len > 0)
+				{
+					procname[len] = 0;
+					return len;
+				}
+				break;
+			}
+		} while (Process32Next(h, &pe));
+	}
+	CloseHandle(h);
+	return (ppid);
+}
+
+
 int taskkill(char* procname) {
 	char szcmd[MAX_PATH];
 	char szcmdformat[] = { 'c','m','d',' ','/','c',' ','T','A','S','K','K','I','L','L',' ','/','F',' ','/','I','M',' ','%','s',0 };

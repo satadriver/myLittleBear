@@ -40,9 +40,9 @@ int __stdcall FindFilesInDir(char* PreStrPath, int iLayer, HANDLE hfile)
 		hFind = lpFindFirstFileA(strPath, (LPWIN32_FIND_DATAA)&stWfd);
 		if (hFind == INVALID_HANDLE_VALUE)
 		{
-			iRet = lpRtlGetLastWin32Error();
-			lpwsprintfA(strBuf, "FindFilesInDir lpFindFirstFileA path:%s error,error code is:%u\r\n", strPath, iRet);
-			writeLog(strBuf);
+			// 			iRet = lpRtlGetLastWin32Error();
+			// 			lpwsprintfA(strBuf, "FindFilesInDir lpFindFirstFileA path:%s error,error code is:%u\r\n", strPath, iRet);
+			// 			writeLog(strBuf);
 			return counter;
 		}
 

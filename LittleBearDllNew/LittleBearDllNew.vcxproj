@@ -22,7 +22,7 @@
     <ProjectGuid>{7183B304-DB22-4413-8985-90C1AA5EC2C3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LittleBearDllNew</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -83,7 +83,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.dll</TargetExt>
-    <TargetName>sbiedll</TargetName>
+    <TargetName>qmnetworkmgr</TargetName>
     <IncludePath>../json;.;./json;D:\vsproject\LittleBear\LittleBearDllNew\;$(IncludePath)</IncludePath>
     <ReferencePath>../json;.;D:\vsproject\LittleBear\LittleBearDllNew\;$(ReferencePath)</ReferencePath>
   </PropertyGroup>

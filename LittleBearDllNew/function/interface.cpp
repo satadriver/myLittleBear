@@ -7,6 +7,16 @@
 #include "public.h"
 #include "log.h"
 
+#include <tlhelp32.h>
+#include <Psapi.h>
+#include "../Utils.h"
+
+#include <Shlwapi.h>
+#include<psapi.h>
+#pragma comment(lib, "kernel32.lib")
+#pragma comment(lib, "shlwapi.lib")
+
+
 
 void Executecpuid(DWORD veax, DWORD* Regs)
 {
@@ -239,6 +249,12 @@ __kernel_entry NTSTATUS  NTAPI lpNtQueryInformationProcess(HMODULE lpDllntdll, I
 int GetParentProcName(char* szParentProcName)
 {
 	int result = 0;
+	if (szParentProcName == 0)
+	{
+		return FALSE;
+	}
+
+	szParentProcName[0] = 0;
 
 	HANDLE hProcess = lpOpenProcess(PROCESS_QUERY_INFORMATION, FALSE, lpGetCurrentProcessId());
 	if (hProcess)
@@ -254,7 +270,7 @@ int GetParentProcName(char* szParentProcName)
 		if (NT_SUCCESS(status))
 		{
 			DWORD dwParentPID = (UINT)pbi.Reserved3;
-			HANDLE hParentProcess = lpOpenProcess(PROCESS_QUERY_INFORMATION, FALSE, dwParentPID);
+			HANDLE hParentProcess = lpOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, dwParentPID);
 			if (hParentProcess)
 			{
 				CHAR szBuf[1024] = { 0 };
@@ -269,11 +285,26 @@ int GetParentProcName(char* szParentProcName)
 				}
 				lpCloseHandle(hParentProcess);
 			}
+			else {
+				writeLog("open processid:%d error\r\n", dwParentPID);
+
+				result = getProcNameByPID(dwParentPID, szParentProcName, MAX_PATH);
+			}
+		}
+		else {
+			writeLog("lpNtQueryInformationProcess error\r\n");
 		}
 		lpCloseHandle(hProcess);
 	}
 	return result;
 }
+
+
+
+
+
+
+
 
 
 

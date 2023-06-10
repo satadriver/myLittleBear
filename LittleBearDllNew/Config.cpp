@@ -50,11 +50,12 @@ int getUserAndServer() {
 	else {
 		if (gUserName[0] && SERVER_IP_ADDRESS[0])
 		{
-			gServerIP = inet_addr(SERVER_IP_ADDRESS);
+			gServerIP = getIpFromStr(SERVER_IP_ADDRESS);
+			//gServerIP = inet_addr(SERVER_IP_ADDRESS);
 		}
 	}
 
-	if (gServerIP && gUserName[0])
+	if (gServerIP && gServerIP != -1 && gUserName[0])
 	{
 		return TRUE;
 	}
