@@ -10,8 +10,13 @@ int GetScreenFrame(int ibits, char* szScreenDCName, int left, int top, int ScrnR
 
 	int iRes = 0;
 
+	HWND hwnd = lpGetDesktopWindow();
+
+	HDC hdc = lpGetDC(hwnd);
+
 	//HDC hdc = lpCreateDCA(szScreenDCName, 0, 0, 0);
-	HDC hdc = lpGetDC(0);
+
+	//HDC hdc = lpGetDC(0);
 	if (hdc == 0)
 	{
 		writeLog("GetScreenFrame lpCreateDCA error:%d\r\n", GetLastError());
