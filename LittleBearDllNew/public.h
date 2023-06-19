@@ -154,7 +154,7 @@ extern INT REMOTECONTROL_BUFFER_SIZE;
 extern int ScrnResolutionX;
 extern int ScrnResolutionY;
 
-extern char SERVER_IP_ADDRESS[64];
+extern char SERVER_IP_ADDRESS[256];
 extern char gUserName[64];
 extern DWORD gServerIP;
 

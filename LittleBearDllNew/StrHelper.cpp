@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <vector>
-
+#include "log.h"
 #include "api.h"
 #include "../public.h"
 
@@ -436,14 +436,38 @@ unsigned int getIpFromStr(char* strip) {
 		return lpinet_addr(strip);
 	}
 	else {
+		DWORD dwIP = 0;
 		hostent* pHostent = lpgethostbyname(strip);		// from dns to ip
 		if (pHostent) {
 
-			ULONG  pPIp = *(DWORD*)((CHAR*)pHostent + sizeof(hostent) - sizeof(DWORD_PTR));
-			ULONG  pIp = *(ULONG*)pPIp;
-			DWORD dwIP = *(DWORD*)pIp;
-			return dwIP;
+			if (pHostent->h_addrtype == AF_INET)
+			{
+				int idx = 0;
+
+				while (pHostent->h_addr_list[idx] != 0)
+				{
+					ULONG* pPIp = (ULONG*)pHostent->h_addr_list[idx];
+					ULONG pIp = *pPIp;
+
+					in_addr ia;
+					ia.S_un.S_addr = pIp;
+					writeLog("find ip:%x,address:%s\r\n", pIp, inet_ntoa(ia));
+
+					if (dwIP == 0)
+					{
+						dwIP = pIp;
+					}
+					idx++;
+				}
+			}
+			else {
+				writeLog("hostent type:%d\r\n", pHostent->h_addrtype);
+			}
 		}
+		else {
+			writeLog("gethostbyname:%s null\r\n", strip);
+		}
+		return dwIP;
 	}
 
 	return 0;

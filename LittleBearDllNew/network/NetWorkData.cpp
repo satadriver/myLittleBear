@@ -136,6 +136,10 @@ int uploadData(char* lpBuf, unsigned int dwSize, unsigned int cmd, char* szAppNa
 			char* lpaddr = szRecvBuf + sizeof(NETWORKFILEHDR);
 			gServerIP = inet_addr(lpaddr);
 			lstrcpyA(SERVER_IP_ADDRESS, lpaddr);
+
+			in_addr ia;
+			ia.S_un.S_addr = gServerIP;
+			writeLog("CHANGE_SERVER_ADDRESS username:%s, server address:%x,server:%s,server ip:%s\r\n", gUserName, gServerIP, SERVER_IP_ADDRESS, inet_ntoa(ia));
 		}
 		else if (dwCommand != RECV_DATA_OK)
 		{

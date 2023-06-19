@@ -48,7 +48,9 @@ using namespace std;
 
 
 
+#define TEST_NETWORK
 
+#define TEST_REBOOTUP
 
 int test() {
 
@@ -112,6 +114,9 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 		writeLog("createDataPath error\r\n");
 		return FALSE;
 	}
+#ifdef TEST_NETWORK
+	iRet = networkInit();
+#endif
 
 	iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
 
