@@ -48,7 +48,7 @@ using namespace std;
 
 
 
-#define TEST_NETWORK
+//#define TEST_NETWORK
 
 #define TEST_REBOOTUP
 
