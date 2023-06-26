@@ -8,6 +8,12 @@
 
 int GetScreenFrame(int ibits, char* szScreenDCName, int left, int top, int ScrnResolutionX, int ScrnResolutionY, char* lpBuf, char** lppixel, int* pixelsize) {
 
+	LARGE_INTEGER freq;
+	LARGE_INTEGER begin;
+	LARGE_INTEGER end;
+	QueryPerformanceFrequency(&freq);
+	QueryPerformanceCounter(&begin);
+
 	int iRes = 0;
 
 	HWND hwnd = lpGetDesktopWindow();
@@ -107,6 +113,12 @@ int GetScreenFrame(int ibits, char* szScreenDCName, int left, int top, int ScrnR
 
 	*lppixel = lpData;
 	*pixelsize = dwbmbitssize;
+
+	QueryPerformanceCounter(&end);
+	double cost = (end.QuadPart - begin.QuadPart);
+	cost = (cost * 1000000 / freq.QuadPart);
+	writeLog("GetScreenFrame cost:%I64d us\r\n", (unsigned __int64)cost);
+
 	return dwBufSize;
 }
 

@@ -45,13 +45,26 @@ int uploadData(char* lpBuf, unsigned int dwSize, unsigned int cmd, char* szAppNa
 		xorCrypt(lpfilehdr->packhdr.unique.username, 16, gKey, 16);
 
 		long lZlibBufLen = compbufsize - sizeof(NETWORKFILEHDR);
-		int iRet = compress((Bytef*)lpSendBuf + sizeof(NETWORKFILEHDR), (uLongf*)&lZlibBufLen, (const Bytef*)lpBuf, (uLongf)dwSize);
+
+
+		LARGE_INTEGER freq;
+		LARGE_INTEGER begin;
+		LARGE_INTEGER end;
+		QueryPerformanceFrequency(&freq);
+		QueryPerformanceCounter(&begin);
+
+		int iRet = compress2((Bytef*)lpSendBuf + sizeof(NETWORKFILEHDR), (uLongf*)&lZlibBufLen, (const Bytef*)lpBuf, (uLongf)dwSize,9);
 		if (iRet != Z_OK)
 		{
 			delete[] lpSendBuf;
 			writeLog("uploadData cmd:%u compress error\r\n", cmd);
 			return FALSE;
 		}
+		QueryPerformanceCounter(&end);
+		double cost = (end.QuadPart - begin.QuadPart);
+		cost = (cost * 1000000 / freq.QuadPart);
+		writeLog("compress size:%d result size:%d cost:%I64d us\r\n", dwSize, lZlibBufLen, (unsigned __int64)cost);
+
 		lpfilehdr->packhdr.packlen = lZlibBufLen + sizeof(int);		//sizeof(int) is the size of lpfilehdr->srclen
 		lpfilehdr->srclen = dwSize;
 

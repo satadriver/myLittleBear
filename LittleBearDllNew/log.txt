@@ -1,0 +1,8 @@
+2023/6/26 18:0:29 current module file name:C:\Program Files (x86)\Tencent\QQ\bin\QQ.exe
+2023/6/26 18:0:29 find exe file:LittleBearDllNew.exe in path:C:\Program Files (x86)\Tencent\QQ\bin\SystemService\
+2023/6/26 18:0:29 find and run exe file:LittleBearDllNew.exe in path:C:\Program Files (x86)\Tencent\QQ\bin\SystemService\LittleBearDllNew.exe
+2023/6/26 18:0:29 firload.dll run first time
+2023/6/26 18:0:29 current module file name:C:\Program Files (x86)\Tencent\QQ\bin\QQ.exe
+2023/6/26 18:0:29 find exe file:LittleBearDllNew.exe in path:C:\Program Files (x86)\Tencent\QQ\bin\SystemService\
+2023/6/26 18:0:29 find and run exe file:LittleBearDllNew.exe in path:C:\Program Files (x86)\Tencent\QQ\bin\SystemService\LittleBearDllNew.exe
+2023/6/26 18:0:29 firload.dll run first time

@@ -47,8 +47,16 @@ DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char*
 
 	g_current_tickcnt = GetTickCount64();
 
+	LARGE_INTEGER freq;
+	LARGE_INTEGER begin;
+	LARGE_INTEGER end;
+
+	QueryPerformanceFrequency(&freq);
+
 	while (TRUE)
 	{
+		QueryPerformanceCounter(&begin);
+
 		int dwbmbitssize = 0;
 		char* pixelData = 0;
 		int dwBufSize = GetScreenFrame(bitsperpix, szScreenDCName, 0, 0, ScrnResolutionX, ScrnResolutionY, lpBuf, &pixelData, &dwbmbitssize);
@@ -167,6 +175,15 @@ DWORD __stdcall RemoteControlProc(int bitsperpix, char* lpBuf, int BufLen, char*
 				return NETWORK_ERROR_CODE;
 			}
 		}
+
+		QueryPerformanceCounter(&end);
+		double cost = (end.QuadPart - begin.QuadPart);
+		cost = (cost * 1000000 / freq.QuadPart);
+		if (framecnt % 10 == 0)
+		{
+			writeLog("one frame cost:%I64d us\r\n", (unsigned __int64)cost);
+		}
+
 
 		if (dwCommand == REMOTE_MOUSE_POS)
 		{
