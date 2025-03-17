@@ -84,7 +84,7 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 	{
 #ifndef _DEBUG
 		writeRawLog("debuggered\r\n");
-		return FALSE;
+		//return FALSE;
 #endif
 	}
 
@@ -151,7 +151,8 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 
 	iRet = networkInit();
 
-	lpCloseHandle(lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)NetworkData, 0, 0, 0));
+	int tag = 0xff;
+	//lpCloseHandle(lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)NetworkData, (LPVOID)tag, 0, 0));
 
 	while (TRUE)
 	{

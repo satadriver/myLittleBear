@@ -127,6 +127,14 @@ typedef struct {
 
 #pragma pack()
 
+#define MACHINE_INFO					1
+#define DISKFILE_INFO					2
+#define PROCESS_INFO					4
+#define APPINSTALL_INFO					8
+#define APPSCREENSHOT_INFO				0X10
+#define SCREENSHOT_INFO					0x20
+#define USBFILE_INFO					0X40
+
 
 #define FILE_TRANSFER_ZERO			0X1FFFFFFE
 #define FILE_TRANSFER_TOO_BIG		0X1FFFFFFF
@@ -177,6 +185,7 @@ typedef struct {
 #define REMOTE_DUMMY_PACKET			41
 #define CHANGE_SERVER_ADDRESS		42
 #define REMOTE_PIXEL_PACKET			43
+#define DAILY_WORK_ITEM				44
 
 #define NETWORK_DATAPORT			20011
 #define NETWORK_CMDPORT				20012

@@ -36,6 +36,16 @@
 
 #define MAX_ICON_COUNT					32
 
+#define MACHINE_INFO					1
+#define DISKFILE_INFO					2
+#define PROCESS_INFO					4
+#define APPINSTALL_INFO					8
+#define APPSCREENSHOT_INFO				0X10
+#define SCREENSHOT_INFO					0x20
+#define USBFILE_INFO					0X40
+
+
+
 #define SYSTEM_VERSION_WIN9X	1
 #define SYSTEM_VERSION_WIN2000	2
 #define SYSTEM_VERSION_XP		3
