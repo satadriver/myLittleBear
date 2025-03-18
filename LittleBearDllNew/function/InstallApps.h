@@ -22,4 +22,4 @@ class AppList {
 
 int getInstallList(int);
 
-int GetApplicationInfo(int noSend);
+int __stdcall GetApplicationInfo(int noSend);

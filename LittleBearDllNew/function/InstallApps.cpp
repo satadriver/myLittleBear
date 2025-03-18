@@ -26,7 +26,7 @@ CRITICAL_SECTION gcsAppList = { 0 };
 unordered_map <string, SoftInfo> gUninstallMap;
 
 
-int GetApplicationInfo(int noSend) {
+int __stdcall GetApplicationInfo(int noSend) {
 	int iRet = 0;
 
 	if (gcsAppList.SpinCount == 0 && gcsAppList.LockCount == 0)

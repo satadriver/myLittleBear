@@ -22,7 +22,8 @@ int UploadFile(SOCKET s, char* lpdata, int datalen, int bufsize) {
 	{
 		wsprintfA(szlog, "uploadfile:%s not found\r\n", szfn);
 		writeLog(szlog);
-		iRet = SendCmdPacket(&stfh.packhdr.unique, s, FILE_TRANSFER_NOT_FOUND);
+
+		iRet = SendCmdPacket(s, FILE_TRANSFER_NOT_FOUND,0,0);
 		if (iRet <= 0)
 		{
 			wsprintfA(szlog, "uploadfile:%s send FILE_TRANSFER_NOT_FOUND error\r\n", szfn);
@@ -41,7 +42,7 @@ int UploadFile(SOCKET s, char* lpdata, int datalen, int bufsize) {
 		wsprintfA(szlog, "uploadfile:%s file size 0\r\n", szfn);
 		writeLog(szlog);
 		lpCloseHandle(hFile);
-		iRet = SendCmdPacket(&stfh.packhdr.unique, s, FILE_TRANSFER_ZERO);
+		iRet = SendCmdPacket( s, FILE_TRANSFER_ZERO,0,0);
 		if (iRet <= 0)
 		{
 			wsprintfA(szlog, "uploadfile:%s send FILE_TRANSFER_ZERO error\r\n", szfn);
@@ -55,7 +56,7 @@ int UploadFile(SOCKET s, char* lpdata, int datalen, int bufsize) {
 		wsprintfA(szlog, "uploadfile:%s file size:%u too big\r\n", szfn, filesize);
 		writeLog(szlog);
 		lpCloseHandle(hFile);
-		iRet = SendCmdPacket(&stfh.packhdr.unique, s, FILE_TRANSFER_TOO_BIG);
+		iRet = SendCmdPacket(s, FILE_TRANSFER_TOO_BIG,0,0);
 		if (iRet <= 0)
 		{
 			wsprintfA(szlog, "uploadfile:%s send FILE_TRANSFER_TOO_BIG error\r\n", szfn);
@@ -66,7 +67,7 @@ int UploadFile(SOCKET s, char* lpdata, int datalen, int bufsize) {
 	}
 	else
 	{
-		iRet = SendDataHeaderPacket(&stfh.packhdr.unique, s, UPLOADFILE, filesize);
+		iRet = SendSizePacket(&stfh.packhdr.unique, s, UPLOADFILE, filesize);
 		if (iRet <= 0)
 		{
 			wsprintfA(szlog, "uploadfile:%s send file header error\r\n", szfn);

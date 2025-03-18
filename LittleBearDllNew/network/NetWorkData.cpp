@@ -222,6 +222,8 @@ int __stdcall NetworkData(int tag) {
 	time_t tmMainTime = time(0);
 	while (1)
 	{
+		break;
+
 		time_t tmNow = time(0);
 		if (tmNow - tmMainTime >= 3600 * 1)
 		{
@@ -263,9 +265,15 @@ int RecvCmdPacket(SOCKET s) {
 
 
 
-int SendCmdPacketWithParam(SOCKET s, int cmd, char* param, int paramsize) {
 
-	char szData[4096];
+
+
+int SendCmdPacket(SOCKET s, int cmd,char * data,int datalen) {
+
+	char szData[0x1000];
+	if (datalen > sizeof(szData) - sizeof(NETWORKPACKETHEADER)) {
+		return -1;
+	}
 	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)szData;
 	lphdr->cmd = cmd;
 	memmove(lphdr->unique.cMAC, cMAC, MAC_ADDRESS_LENGTH);
@@ -274,29 +282,11 @@ int SendCmdPacketWithParam(SOCKET s, int cmd, char* param, int paramsize) {
 	lphdr->unique.crypt = DATANONECRYPT;
 	memset(lphdr->unique.username, 0, 16);
 	lstrcpyA((char*)lphdr->unique.username, (char*)gUserName);
-	lphdr->packlen = paramsize;
-
-	memmove(szData + sizeof(NETWORKPACKETHEADER), param, paramsize);
-	int iLen = sizeof(NETWORKPACKETHEADER) + paramsize;
-
-	int iRet = lpsend(s, szData, iLen, 0);
-	return iRet;
-}
-
-
-int SendCmdPacket(SOCKET s, int cmd,int subcmd) {
-
-	char szData[1024];
-	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)szData;
-	lphdr->cmd = cmd;
-	memmove(lphdr->unique.cMAC, cMAC, MAC_ADDRESS_LENGTH);
-	lphdr->unique.dwVolumeNO = ulVolumeSerialNo;
-	lphdr->unique.compress = DATANONECOMPRESS;
-	lphdr->unique.crypt = DATANONECRYPT;
-	memset(lphdr->unique.username, 0, 16);
-	lstrcpyA((char*)lphdr->unique.username, (char*)gUserName);
-	lphdr->packlen = subcmd;
-	int iLen = sizeof(NETWORKPACKETHEADER);
+	lphdr->packlen = datalen;
+	if (datalen > 0) {
+		memcpy((char*)lphdr + sizeof(NETWORKPACKETHEADER), data, datalen);
+	}
+	int iLen = sizeof(NETWORKPACKETHEADER) + datalen;
 
 	int iRet = lpsend(s, szData, iLen, 0);
 
@@ -305,23 +295,11 @@ int SendCmdPacket(SOCKET s, int cmd,int subcmd) {
 
 
 
-int SendCmdPacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd) {
-
-	char szData[1024];
-	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)szData;
-	lphdr->cmd = cmd;
-	lphdr->unique = *lpUnique;
-	lphdr->packlen = 0;
-	int iLen = sizeof(NETWORKPACKETHEADER);
-
-	int iRet = lpsend(s, szData, iLen, 0);
-
-	return iRet;
-}
 
 
 
-int SendDataHeaderPacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd, int size) {
+
+int SendSizePacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd, int size) {
 
 	char szData[1024];
 	LPNETWORKPACKETHEADER lphdr = (LPNETWORKPACKETHEADER)szData;

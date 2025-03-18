@@ -66,7 +66,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 
 
 		STREMOTECONTROLPARAMS param = { ScrnResolutionX,ScrnResolutionY,REMOTEBMP_BITSPERPIXEL };
-		iRet = SendCmdPacketWithParam(hSock, REMOTECONTROL_PARAMS, (char*)&param, sizeof(STREMOTECONTROLPARAMS));
+		iRet = SendCmdPacket(hSock, REMOTECONTROL_PARAMS, (char*)&param, sizeof(STREMOTECONTROLPARAMS));
 		if (iRet <= 0)
 		{
 			lpclosesocket(hSock);

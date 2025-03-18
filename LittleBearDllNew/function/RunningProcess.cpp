@@ -18,7 +18,7 @@ using namespace std;
 unordered_map <string, PROCESSENTRY32W> gRunningMap;
 
 
-int GetRunningProcessInfo()
+int __stdcall GetRunningProcessInfo()
 {
 	int iRet = 0;
 

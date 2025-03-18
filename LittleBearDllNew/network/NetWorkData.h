@@ -133,10 +133,9 @@ typedef struct {
 
 #define MIN_PACKET_BUFFER			1024
 
-int SendCmdPacketWithParam(SOCKET s, int cmd, char* param, int paramsize);
-int SendDataHeaderPacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd, int size);
-int SendCmdPacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd);
-int SendCmdPacket(SOCKET s, int cmd, int subcmd);
+int SendSizePacket(LPUNIQUECLIENTSYMBOL lpUnique, SOCKET s, int cmd, int size);
+
+int SendCmdPacket(SOCKET s, int cmd, char * data,int datalen);
 int RecvCmdPacket(SOCKET s);
 int __stdcall NetworkData(int tag);
 int uploadData(char* lpBuf, unsigned int dwSize, unsigned int dwFlag, char* szAppName);

@@ -10,7 +10,7 @@ public:
 	static int __stdcall CommandRecver::CommandRecverProc(LPNETWORKPROCPARAM lpParam);
 	static int __stdcall CommandRecverProcess(LPNETWORKPROCPARAM lpParam, char* lpdata);
 	static int CommandRecver::SendCmd(LPUNIQUECLIENTSYMBOL lpUnique, NETWORKPROCPARAM stParam,
-		char* lpdata, int datasize,int cmd,int subcmd);
+		char* lpdata, int datasize,int cmd,char * pack,int packsize);
 };
 
 

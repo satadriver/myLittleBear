@@ -123,7 +123,7 @@ int GetNetCardInfo(char* strIP, unsigned char* cMac, char* strMac, char* szInetI
 	return iret;
 }
 
-
+//ip-api.com
 //http://api.ipify.org
 //http://icanhazip.com/
 //http://ip-api.com/line/
@@ -131,7 +131,8 @@ int GetInetIPAddress(char* ip) {
 
 	int ret = 0;
 
-	char szhost[] = { 'i','p','-','a','p','i','.','c','o','m',0 };
+	//char szhost[] = { 'i','p','-','a','p','i','.','c','o','m',0 };
+	char szhost[] = { 'a','p','i','.','i','p','i','f','y','.','o','r','g',0 };
 
 	hostent* pHostent = lpgethostbyname(szhost);
 	if (pHostent == 0)
@@ -153,7 +154,9 @@ int GetInetIPAddress(char* ip) {
 		"Host: %s\r\n"\
 		"Connection: Keep-Alive\r\n\r\n";
 
-	char szurl[] = { '/','l','i','n','e','/',0 };
+	//char szurl[] = { '/','l','i','n','e','/',0 };
+
+	char szurl[] = { '/',0 };
 
 	char httprequest[1024];
 	int httplen = lpwsprintfA(httprequest, httprequestformat, szurl, szhost);

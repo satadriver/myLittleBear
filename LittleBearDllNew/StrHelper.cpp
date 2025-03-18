@@ -453,9 +453,10 @@ unsigned int getIpFromStr(char* strip) {
 					ia.S_un.S_addr = pIp;
 					writeLog("find ip:%x,address:%s\r\n", pIp, inet_ntoa(ia));
 
-					if (dwIP == 0)
+					if (dwIP == 0 && pIp)
 					{
 						dwIP = pIp;
+						break;
 					}
 					idx++;
 				}

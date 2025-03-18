@@ -10,4 +10,4 @@ typedef struct
 
 #pragma pack()
 
-int GetRunningProcessInfo();
+int __stdcall GetRunningProcessInfo();

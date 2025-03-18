@@ -117,8 +117,9 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 #ifdef TEST_NETWORK
 	iRet = networkInit();
 #endif
-
+#ifndef _DEBUG
 	iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
+#endif
 
 	DWORD uac = IsUACEnable(iCpuBits, &iEnableLUA, &iConsentPromptBehaviorAdmin, &iPromptOnSecureDesktop);
 	iIsUserAdmin = IsAdministratorUser();
