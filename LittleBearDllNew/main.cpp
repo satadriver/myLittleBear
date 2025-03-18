@@ -123,9 +123,9 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 		writeRawLog("debuggered\r\n");
 		if (gStartMode == ONE_EXE_AND_ONE_DLL) {
 			return FALSE;
-	}
+		}
 #endif
-}
+	}
 
 	DWORD uac = IsUACEnable(iCpuBits, &iEnableLUA, &iConsentPromptBehaviorAdmin, &iPromptOnSecureDesktop);
 	iIsUserAdmin = IsAdministratorUser();
