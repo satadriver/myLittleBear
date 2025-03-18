@@ -83,6 +83,7 @@ char SERVER_IP_ADDRESS[256] = "googfun888.servequake.com";			//zozotown2304.ufcf
 char gUserName[64] = "test";
 DWORD gServerIP = 0;
 int gStartMode = 0;
+unsigned char gClientKey[16] = { 0 };
 
 char  CONFIG_FILENAME[] = { 'c','o','n','f','i','g','.','d','a','t',0 };
 

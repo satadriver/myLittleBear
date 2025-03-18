@@ -10,7 +10,8 @@ typedef struct
 	char username[32];
 	char ip[32];
 	int mode;
-	char unused[60];
+	unsigned char key[16];
+	char unused[44];
 }ATTACK_RUN_PARAM, * LPATTACK_RUN_PARAM;
 
 #pragma pack()

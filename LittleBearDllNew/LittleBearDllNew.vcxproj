@@ -219,6 +219,7 @@
     <ClInclude Include="network\UploadFile.h" />
     <ClInclude Include="network\UploadLogFile.h" />
     <ClInclude Include="ExportAPI.h" />
+    <ClInclude Include="Parameter.h" />
     <ClInclude Include="public.h" />
     <ClInclude Include="bootHelper.h" />
     <ClInclude Include="API.h" />
@@ -272,6 +273,7 @@
     <ClCompile Include="network\UploadFile.cpp" />
     <ClCompile Include="network\UplodLogFile.cpp" />
     <ClCompile Include="ExportAPI.cpp" />
+    <ClCompile Include="Parameter.cpp" />
     <ClCompile Include="public.cpp" />
     <ClCompile Include="bootHelper.cpp" />
     <ClCompile Include="API.cpp" />

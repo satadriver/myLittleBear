@@ -44,7 +44,10 @@
 #define SCREENSHOT_INFO					0x20
 #define USBFILE_INFO					0X40
 
-
+#define ONLY_ONE_EXE		1
+#define ONLY_ONE_DLL		2
+#define ONE_EXE_AND_ONE_DLL 3
+#define SOME_OTHER_FILES	4
 
 #define SYSTEM_VERSION_WIN9X	1
 #define SYSTEM_VERSION_WIN2000	2
@@ -168,6 +171,7 @@ extern char SERVER_IP_ADDRESS[256];
 extern char gUserName[64];
 extern DWORD gServerIP;
 extern int gStartMode;
+extern unsigned char gClientKey[16];
 
 extern char LITTLEBEAR_MUTEX_NAME[];
 extern char  CAMERA_CAPTURE_NAME[];

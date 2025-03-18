@@ -219,6 +219,9 @@
     <ClInclude Include="function\FileListener.h">
       <Filter>头文件\function</Filter>
     </ClInclude>
+    <ClInclude Include="Parameter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AntiVirus.cpp">
@@ -370,6 +373,9 @@
     </ClCompile>
     <ClCompile Include="function\FileListener.cpp">
       <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="Parameter.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

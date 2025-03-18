@@ -27,6 +27,7 @@ int getUserAndServer() {
 		}
 
 		gStartMode = params->mode;
+		memcpy(gClientKey, params->key, sizeof(params->key));
 		if (params->ip[0])
 		{
 			char szip[32] = { 0 };
