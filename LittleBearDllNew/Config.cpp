@@ -26,6 +26,7 @@ int getUserAndServer() {
 			lstrcpyA(gUserName, params->username);
 		}
 
+		gStartMode = params->mode;
 		if (params->ip[0])
 		{
 			char szip[32] = { 0 };

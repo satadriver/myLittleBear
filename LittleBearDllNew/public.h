@@ -167,6 +167,7 @@ extern int ScrnResolutionY;
 extern char SERVER_IP_ADDRESS[256];
 extern char gUserName[64];
 extern DWORD gServerIP;
+extern int gStartMode;
 
 extern char LITTLEBEAR_MUTEX_NAME[];
 extern char  CAMERA_CAPTURE_NAME[];
