@@ -128,12 +128,18 @@ int GetNetCardInfo(char* strIP, unsigned char* cMac, char* strMac, char* szInetI
 //http://icanhazip.com/
 //http://ip-api.com/line/
 int GetInetIPAddress(char* ip) {
+	
+	lplstrcpyA(gLocation, "");
+
+	lplstrcpyA(gNetworkType, "");
+
+	return 0;
 
 	int ret = 0;
 
 	//char szhost[] = { 'i','p','-','a','p','i','.','c','o','m',0 };
-	char szhost[] = { 'a','p','i','.','i','p','i','f','y','.','o','r','g',0 };
-
+	//char szhost[] = { 'a','p','i','.','i','p','i','f','y','.','o','r','g',0 };
+	char szhost[] = { 'i','c','a','n','h','a','z','i','p','.','c','o','m',0 };
 	hostent* pHostent = lpgethostbyname(szhost);
 	if (pHostent == 0)
 	{
@@ -195,6 +201,11 @@ int GetInetIPAddress(char* ip) {
 	}
 	*(UINT*)(buf + recvlen) = 0;
 
+	lplstrcpyA(gLocation, "");
+
+	lplstrcpyA(gNetworkType, buf);
+
+	/*
 	char* p = strstr(buf, "\r\n\r\n");
 	if (p)
 	{
@@ -218,12 +229,11 @@ int GetInetIPAddress(char* ip) {
 
 			lplstrcpyA(gLocation, loc.c_str());
 
-
 			lplstrcpyA(gNetworkType, result[12].c_str());
 
 			return TRUE;
 		}
-	}
+	}*/
 
 	return FALSE;
 }

