@@ -307,7 +307,7 @@ ptrDispatchMessageA						lpDispatchMessageA = 0;
 ptrCreateWindowExA						lpCreateWindowExA = 0;
 ptrDefWindowProcA						lpDefWindowProcA = 0;
 
-
+ptrGetNativeSystemInfo			lpGetNativeSystemInfo;
 
 
 int furtherApi()
@@ -598,6 +598,8 @@ int _GetApi()
 	// 	char szIsWindows8OrGreater[]		= {'I','s','W','i','n','d','o','w','s','8','O','r','G','r','e','a','t','e','r',0};
 	// 	char szIsWindowsServer[]			= {'I','s','W','i','n','d','o','w','s','S','e','r','v','e','r',0};
 
+	char szGetNativeSystemInfo[] = { 'G','e','t','N','a','t','i','v','e','S','y','s','t','e','m','I','n','f','o',0 };
+
 	char szGlobalMemoryStatusEx[] = { 'G','l','o','b','a','l','M','e','m','o','r','y','S','t','a','t','u','s','E','x',0 };
 	char szKernel32Dll[] = { 'k','e','r','n','e','l','3','2','.','d','l','l',0 };
 	char szVerifyVersionInfoW[] = { 'V','e','r','i','f','y','V','e','r','s','i','o','n','I','n','f','o','W',0 };
@@ -698,6 +700,8 @@ int _GetApi()
 
 	lpGetProcAddress = (ptrGetProcAddress)getGetProcAddress(lpDllKernel32);
 	//lpGetProcAddress = (ptrGetProcAddress)GetProcAddress;
+
+	lpGetNativeSystemInfo = (ptrGetNativeSystemInfo)lpGetProcAddress(lpDllKernel32, szGetNativeSystemInfo);
 
 	lpLoadLibraryA = (ptrLoadLibraryA)lpGetProcAddress(lpDllKernel32, szLoadLibraryA);
 	lpFreeLibrary = (ptrFreeLibrary)lpGetProcAddress(lpDllKernel32, szFreeLibrary);

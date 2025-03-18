@@ -94,13 +94,13 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 		//writeLog("_GetApi ok\r\n");
 	}
 
-	iRet = getUserAndServer();
-
 	iRet = furtherApi();
+
+	iRet = getUserAndServer();
 
 	//need to get computer info before write log file
 	iRet = GetUserAndComputerName(strUserName, strComputerName);
-	iCpuBits = GetCpuBits();
+	iCpuBits = GetOsBits();
 	iSystemVersion = GetWindowsVersion(strSysVersion);
 	iRet = GetSystemDir(szSysDir);
 	iRet = createDataPath();

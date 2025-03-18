@@ -73,7 +73,11 @@ int GetSystemDir(char* sysdir) {
 }
 
 
-int GetCpuBits()
+
+
+
+
+int IsWow64()
 {
 	BOOL bIsWow64 = FALSE;
 	//IsWow64Process is not available on all supported versions of Windows.
@@ -93,13 +97,39 @@ int GetCpuBits()
 		{
 			if (bIsWow64)
 			{
-				return 64;
+				return TRUE;
 			}
 		}
 	}
-	return 32;
+	return FALSE;
 }
 
+
+int CpuBits() {
+	SYSTEM_INFO si;
+	lpGetNativeSystemInfo(&si);
+	if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 || si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
+		return 64;
+	else
+		return 32;
+}
+
+int GetOsBits() {
+	int wow = IsWow64();
+
+	int cpubits = CpuBits();
+
+	if (cpubits == 64 && wow == FALSE)
+	{
+		return 64;
+	}
+	else if (cpubits == 64 && wow==TRUE)
+	{
+		return 64;
+	}
+
+	return 32;
+}
 
 BOOL IsWin11AndLater()
 {

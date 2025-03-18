@@ -485,7 +485,7 @@ int __stdcall GetMachineInfo()
 		char* pCpu = GetCPUBrand(strCpuBrand);
 
 		iRet = GetUserAndComputerName(strUserName, strComputerName);
-		iCpuBits = GetCpuBits();
+		iCpuBits = GetOsBits();
 		iSystemVersion = GetWindowsVersion(strSysVersion);
 		iRet = GetSystemDir(szSysDir);
 

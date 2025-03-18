@@ -14,7 +14,7 @@ DWORD QueryRegistryValue(HKEY hMainKey, char* szSubKey, char* szKeyName, unsigne
 {
 	char szout[1024];
 
-	int iCpuBits = GetCpuBits();
+	int iCpuBits = GetOsBits();
 
 	DWORD dwType = KEY_READ | KEY_WRITE;
 
@@ -64,7 +64,7 @@ DWORD __SetRegistryKeyValueChar(HKEY hMainKey, char* szSubKey, char* szKeyName, 
 	HKEY hKey = 0;
 	int iRes = 0;
 
-	int iCpuBits = GetCpuBits();
+	int iCpuBits = GetOsBits();
 
 	DWORD dwType = KEY_READ | KEY_WRITE;
 
@@ -147,7 +147,7 @@ DWORD __SetRegistryKeyValueDword(HKEY hMainKey, char* szSubKey, char* szKeyName,
 {
 	DWORD dwType = KEY_READ | KEY_WRITE;
 
-	int iCpuBits = GetCpuBits();
+	int iCpuBits = GetOsBits();
 
 	PVOID dwWow64Value;
 	if (iCpuBits == 64 && hMainKey == HKEY_LOCAL_MACHINE)
@@ -242,7 +242,7 @@ int SetBootForRegRun(HKEY hMainKey, char* strPEResidence)
 
 	DWORD dwType = KEY_READ | KEY_WRITE;
 
-	int iCpuBits = GetCpuBits();
+	int iCpuBits = GetOsBits();
 
 	PVOID dwWow64Value;
 	if (iCpuBits == 64 && hMainKey == HKEY_LOCAL_MACHINE)

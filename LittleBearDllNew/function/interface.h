@@ -19,7 +19,7 @@ int GetHostName(char* szHostName);
 
 int GetDiskSpaceInfo(char* szBuf);
 
-int GetCpuBits();
+int GetOsBits();
 
 int GetWindowsVersion(char* strSysVersion);
 

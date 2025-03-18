@@ -369,6 +369,10 @@ typedef DWORD(WINAPI* ptrGetWindowRect)(_In_ HWND hWnd, _Out_ LPRECT lpRect);
 typedef BOOL(__stdcall* ptrSetProcessDPIAware)();
 typedef BOOL(__stdcall* ptrIsProcessDPIAware)();
 
+typedef VOID(__stdcall* ptrGetNativeSystemInfo)(
+	_Out_ LPSYSTEM_INFO lpSystemInfo
+	);
+
 
 extern HMODULE					lpThisDll;
 extern HMODULE					lpDllShell32;
@@ -674,7 +678,7 @@ extern ptrDispatchMessageA						lpDispatchMessageA;
 extern ptrCreateWindowExA						lpCreateWindowExA;
 extern ptrDefWindowProcA						lpDefWindowProcA;
 
-
+extern ptrGetNativeSystemInfo			lpGetNativeSystemInfo;
 
 int _GetApi();
 
