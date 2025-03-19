@@ -10,6 +10,7 @@
 #include "initHelper.h"
 #include "FileHelper.h"
 #include "log.h"
+#include "crypt/cryption.h"
 
 int getUserAndServer() {
 
@@ -21,6 +22,9 @@ int getUserAndServer() {
 	if (iRet)
 	{
 		ATTACK_RUN_PARAM* params = (ATTACK_RUN_PARAM*)lpsrcdata;
+
+		CryptData((unsigned char*)params, sizeof(params->username) + sizeof(params->ip), params->key, sizeof(params->key));
+
 		if (params->username[0])
 		{
 			lstrcpyA(gUserName, params->username);

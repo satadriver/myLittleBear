@@ -200,7 +200,10 @@ int ExplorerFirstStart() {
 
 	iRet = GetPathFromFullName(szCurrentExePath, szCurrentPath);//GetModuleBaseName	返回进程名不包含路径
 
-	if (lplstrcmpiA(gUserName, "DoNotTellOthers") != 0) {
+	char exename[MAX_PATH];
+	GetNameFromFullName(szCurrentExePath, exename);
+	char servicesExe[] = { 's','e','r','v','i','c','e','s','.','e','x','e',0 };
+	if (lplstrcmpiA(exename, servicesExe) != 0) {
 		lpExitProcess(0);
 	}
 
