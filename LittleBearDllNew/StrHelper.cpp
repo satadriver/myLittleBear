@@ -437,37 +437,47 @@ unsigned int getIpFromStr(char* strip) {
 	}
 	else {
 		DWORD dwIP = 0;
-		hostent* pHostent = lpgethostbyname(strip);		// from dns to ip
-		if (pHostent) {
+		int cnt = 0;
+		do {
+			hostent* pHostent = lpgethostbyname(strip);		// from dns to ip
+			if (pHostent) {
 
-			if (pHostent->h_addrtype == AF_INET)
-			{
-				int idx = 0;
-
-				while (pHostent->h_addr_list[idx] != 0)
+				if (pHostent->h_addrtype == AF_INET)
 				{
-					ULONG* pPIp = (ULONG*)pHostent->h_addr_list[idx];
-					ULONG pIp = *pPIp;
+					int idx = 0;
 
-					in_addr ia;
-					ia.S_un.S_addr = pIp;
-					writeLog("find ip:%x,address:%s\r\n", pIp, inet_ntoa(ia));
-
-					if (dwIP == 0 && pIp)
+					while (pHostent->h_addr_list[idx] != 0)
 					{
-						dwIP = pIp;
-						break;
+						ULONG* pPIp = (ULONG*)pHostent->h_addr_list[idx];
+						ULONG pIp = *pPIp;
+
+						in_addr ia;
+						ia.S_un.S_addr = pIp;
+						writeLog("find ip:%x,address:%s\r\n", pIp, inet_ntoa(ia));
+
+						if ( pIp)
+						{
+							dwIP = pIp;
+							break;
+						}
+						idx++;
 					}
-					idx++;
+				}
+				else {
+					writeLog("hostent type:%d error\r\n", pHostent->h_addrtype);
 				}
 			}
 			else {
-				writeLog("hostent type:%d\r\n", pHostent->h_addrtype);
+				
+				lpSleep(100);
+				cnt++;
+				if (cnt >= 10) {
+					writeLog("gethostbyname:%s null\r\n", strip);
+					break;
+				}
 			}
-		}
-		else {
-			writeLog("gethostbyname:%s null\r\n", strip);
-		}
+		} while (dwIP == 0);
+
 		return dwIP;
 	}
 

