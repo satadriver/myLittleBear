@@ -48,6 +48,13 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 	int iRet = 0;
 	char szShowInfo[1024];
 
+	char szCurrentExePath[MAX_PATH] = { 0 };
+	iRet = lpGetModuleFileNameA(0, szCurrentExePath, MAX_PATH);
+	char szExeName[MAX_PATH] = { 0 };
+	iRet = GetNameFromFullName(szCurrentExePath, szExeName);
+
+	lpwsprintfA(strPEResidence, "%s%s", strDataPath, szExeName);
+
 	int iArgc = 0;
 	wchar_t** lpArgvW = lpCommandLineToArgvW(lpGetCommandLineW(), &iArgc);
 	if (iArgc >= 2)
