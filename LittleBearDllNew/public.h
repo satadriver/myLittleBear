@@ -128,6 +128,7 @@ extern int iSystemVersion;
 extern char strSysVersion[32];
 extern int iCpuBits;
 extern char strPEResidence[MAX_PATH];
+extern char strPEResParam[MAX_PATH];
 
 extern char strDataPath[MAX_PATH];
 extern char strLocalMac[32];

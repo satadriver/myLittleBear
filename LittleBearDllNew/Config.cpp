@@ -64,7 +64,7 @@ int getUserAndServer() {
 
 	in_addr ia;
 	ia.S_un.S_addr = gServerIP;
-	writeLog("username:%s, server address:%x,server:%s,server ip:%s\r\n", gUserName, gServerIP, SERVER_IP_ADDRESS, inet_ntoa(ia));
+	//writeLog("username:%s, server address:%x,server:%s,server ip:%s\r\n", gUserName, gServerIP, SERVER_IP_ADDRESS, inet_ntoa(ia));
 
 	if (gServerIP && gServerIP != -1 && gUserName[0])
 	{

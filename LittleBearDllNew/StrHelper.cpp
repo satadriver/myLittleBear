@@ -453,7 +453,7 @@ unsigned int getIpFromStr(char* strip) {
 
 						in_addr ia;
 						ia.S_un.S_addr = pIp;
-						writeLog("find ip:%x,address:%s\r\n", pIp, inet_ntoa(ia));
+						//writeLog("find ip:%x,address:%s\r\n", pIp, inet_ntoa(ia));
 
 						if ( pIp)
 						{

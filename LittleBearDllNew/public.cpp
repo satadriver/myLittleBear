@@ -11,6 +11,7 @@ int iCpuBits = 0;
 char strDataPath[MAX_PATH] = { 0 };
 
 char strPEResidence[MAX_PATH] = { 0 };
+char strPEResParam[MAX_PATH] = { 0 };
 
 char strLocalMac[32] = { 0 };
 unsigned char cMAC[6] = { 0 };
