@@ -97,9 +97,7 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 		return FALSE;
 	}
 
-	
-
-	iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
+	//iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
 
 	iRet = networkInit();
 

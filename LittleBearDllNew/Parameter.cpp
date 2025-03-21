@@ -195,9 +195,7 @@ int ExplorerFirstStart() {
 			//iRet = lpWinExec(szCmd, SW_HIDE);
 
 			char szShowInfo[1024];
-			lpwsprintfA(szShowInfo,
-				"restart program:%s %s for the sake of redirection\r\n",
-				strPEResidence, params);
+			lpwsprintfA(szShowInfo,"restart program:%s %s for the sake of redirection\r\n",strPEResidence, params);
 			writeLog(szShowInfo);
 
 			lpExitProcess(0);
@@ -205,7 +203,7 @@ int ExplorerFirstStart() {
 		}
 	}
 	else {
-		writeLog("run first in same path\r\n");
+		writeLog("run first time in same path\r\n");
 		ExitProcess(0);
 	}
 
