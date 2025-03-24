@@ -29,6 +29,8 @@ DWORD getIPstr(DWORD ip, char* strIP);
 
 int adjustPrivileges();
 
+int delay(int seconds);
+
 class Uitls {
 
 };

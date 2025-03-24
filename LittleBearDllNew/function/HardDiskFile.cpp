@@ -270,14 +270,15 @@ int __stdcall DeleteAllFilesInDir(char* szPreStrPath)
 			return FALSE;
 		}
 
-		while (lpFindNextFileA(hFind, (LPWIN32_FIND_DATAA)&stWfd) != 0)
+		do
 		{
-			if (lpRtlCompareMemory(stWfd.cFileName, szLastDir, 2) == 2 || lpRtlCompareMemory(stWfd.cFileName, szLastDir, 1) == 1)
+			if (stWfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				continue;
-			}
-			else if (stWfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			{
+				if (lpRtlCompareMemory(stWfd.cFileName, szLastDir, 2) == 2 ||
+					lpRtlCompareMemory(stWfd.cFileName, szLastDir, 1) == 1)
+				{
+					continue;
+				}
 				char sznextpath[MAX_PATH];
 				lplstrcpyA(sznextpath, szPreStrPath);
 				lplstrcatA(sznextpath, stWfd.cFileName);
@@ -306,7 +307,8 @@ int __stdcall DeleteAllFilesInDir(char* szPreStrPath)
 					iRet = lpRtlGetLastWin32Error();
 				}
 			}
-		}
+		} while (lpFindNextFileA(hFind, (LPWIN32_FIND_DATAA)&stWfd) != 0);
+
 		lpFindClose(hFind);
 
 		iRet = lpRemoveDirectoryA(szPreStrPath);

