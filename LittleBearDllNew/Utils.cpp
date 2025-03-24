@@ -629,8 +629,7 @@ int checkVM() {
 		char myusername[] = { 'l','j','g',0 };
 		if (lstrcmpA(username, myusername))
 		{
-			runLog("running in box:%d\r\n", vmlabel);
-			suicide();
+			ExitProcess(0);
 		}
 #endif
 	}
