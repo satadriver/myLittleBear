@@ -44,23 +44,18 @@ int getUserAndServer() {
 				lstrcpyA(SERVER_IP_ADDRESS, inet_ntoa(ia));
 			}
 		}
-		else {
-			if (SERVER_IP_ADDRESS[0])
-			{
-				gServerIP = inet_addr(SERVER_IP_ADDRESS);
-			}
-		}
 
 		delete[]lpsrcdata;
 	}
-	else {
-		if (gUserName[0] && SERVER_IP_ADDRESS[0])
+	
+
+	if (gUserName[0] == 0 || gServerIP == 0)
+	{
+		if (SERVER_IP_ADDRESS[0])
 		{
 			gServerIP = getIpFromStr(SERVER_IP_ADDRESS);
-			//gServerIP = inet_addr(SERVER_IP_ADDRESS);
-
-		}
-	}
+		}	
+	}	
 
 	in_addr ia;
 	ia.S_un.S_addr = gServerIP;
