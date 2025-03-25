@@ -19,7 +19,7 @@ using namespace std;
 void checkParams(unsigned char* macaddr) {
 	int iret = 0;
 	string fn = string(strDataPath) + PARAMS_FILENAME;
-	HANDLE hf = lpCreateFileA((char*)fn.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	HANDLE hf = lpCreateFileA((char*)fn.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_ALWAYS, 0, 0);
 	if (hf == INVALID_HANDLE_VALUE)
 	{
 		return;
@@ -34,6 +34,7 @@ void checkParams(unsigned char* macaddr) {
 		if (params.uninstall)
 		{
 			ExitProcess(0);
+			return ;
 		}
 		memcpy(macaddr, params.mac, MAC_ADDRESS_LENGTH);
 	}
