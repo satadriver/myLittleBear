@@ -14,6 +14,8 @@
 
 int getUserAndServer() {
 
+	lstrcpyA(SERVER_IP_ADDRESS,"10.43.41.5");
+
 	char strFilePath[MAX_PATH] = { 0 };
 	int iRet = makeFullFileName(strFilePath, CONFIG_FILENAME);
 	char* lpsrcdata = 0;
