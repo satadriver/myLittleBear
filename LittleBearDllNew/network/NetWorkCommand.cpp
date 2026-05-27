@@ -108,7 +108,7 @@ DWORD  WINAPI NetWorkCommand(VOID)
 
 			in_addr ia;
 			ia.S_un.S_addr = gServerIP;
-			writeLog("%s lpconnect %s:%d error code:%u\r\n", __FUNCTION__,inet_ntoa(ia), NETWORK_CMDPORT, lpRtlGetLastWin32Error());
+			//writeLog("%s lpconnect %s:%d error code:%u\r\n", __FUNCTION__,inet_ntoa(ia), NETWORK_CMDPORT, lpRtlGetLastWin32Error());
 			return FALSE;
 		}
 

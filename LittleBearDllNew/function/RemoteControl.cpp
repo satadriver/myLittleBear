@@ -40,7 +40,7 @@ DWORD __stdcall RemoteControl(LPVOID)
 		if (iRet == SOCKET_ERROR)
 		{
 			lpclosesocket(hSock);
-			writeLog("RemoteControlProc lpconnect error:%d\r\n", GetLastError());
+			//writeLog("RemoteControlProc lpconnect error:%d\r\n", GetLastError());
 			return FALSE;
 		}
 

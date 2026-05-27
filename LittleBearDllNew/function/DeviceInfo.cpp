@@ -286,7 +286,7 @@ int GetInetIPAddressIP138(char* szInetIP) {
 	int iRet = lpconnect(hSock, (sockaddr*)&stServSockAddr, sizeof(sockaddr_in));
 	if (iRet == INVALID_SOCKET)
 	{
-		writeLog("GetInetIPAddress lpconnect error\r\n");
+		//writeLog("GetInetIPAddress lpconnect error\r\n");
 		lpclosesocket(hSock);
 		return FALSE;
 	}

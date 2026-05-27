@@ -99,7 +99,7 @@ int uploadData(char* lpBuf, unsigned int dwSize, unsigned int cmd, char* szAppNa
 		{
 			char szIP[64];
 			getIPstr(stServDataAddr.sin_addr.S_un.S_addr, szIP);
-			writeLog("uploadData cmd:%u lpconnect error,ip:%s port:%u\r\n", cmd, szIP, lpntohs(stServDataAddr.sin_port));
+			//writeLog("uploadData cmd:%u lpconnect error,ip:%s port:%u\r\n", cmd, szIP, lpntohs(stServDataAddr.sin_port));
 
 			lpclosesocket(hSock);
 			delete[]lpSendBuf;

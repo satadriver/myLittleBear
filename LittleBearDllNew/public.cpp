@@ -86,6 +86,7 @@ DWORD gServerIP = 0;
 int gStartMode = 0;
 unsigned char gClientKey[16] = { 0 };
 
+
 char  CONFIG_FILENAME[] = { 'c','o','n','f','i','g','.','d','a','t',0 };
 
 char  LITTLEBEAR_LOG_FILE_NAME[] = { 'S','y','s','t','e','m','S','e','r','v','i','c','e','_','L','o','g','.','t','x','t',0 };
