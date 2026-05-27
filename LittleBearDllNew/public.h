@@ -8,7 +8,7 @@
 
 typedef struct {
 
-	char tag[16];
+	char tag[64];
 	DWORD ip;
 	char host[256];
 	char user[32];
